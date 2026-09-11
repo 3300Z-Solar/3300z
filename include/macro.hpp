@@ -2,7 +2,7 @@
 #include "main.h"
 
 
-inline pros::MotorGroup liftMotors({4, -2}, pros::MotorGearset::blue); // lift motor group - ports 4, 2 (reversed)
+inline pros::MotorGroup liftMotors({4, -2}, pros::MotorGearset::red); // lift motor group - ports 4, 2 (reversed)
 inline pros::Rotation liftRot(19);
 inline int liftStates[2] = {105, 120};
 // [0] = bottom / starting pos (used by R2 homing)

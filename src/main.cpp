@@ -123,8 +123,6 @@ void competition_initialize() {}
 void autonomous() {
 chassis.moveToPoint(0, 0, 5000);
 
-
-
 }
 
 void opcontrol() {
@@ -140,9 +138,9 @@ void opcontrol() {
 
             double liftJogTarget = 0;
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-                liftJogTarget = 9000;
+                liftJogTarget = 11000;
             } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-                liftJogTarget = -3000;
+                liftJogTarget = -8000;
             }
 
             static bool wasJogging = false;
