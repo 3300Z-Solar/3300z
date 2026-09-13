@@ -112,10 +112,11 @@ void initialize() {
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            // log position telemetry
-            lemlib::telemetrySink()->info("Chassis pose: {}", chassis.getPose());
+            // log position JSON to the terminal
+            printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+                   chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
             // delay to save resources
-            delay(4000);
+            delay(100);
         }
     });
 }
@@ -125,7 +126,8 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-chassis.moveToPoint(0, 0, 5000);
+chassis.setPose({0,0,0});
+chassis.moveToPoint(0, 10, 5000);
 
 }
 
