@@ -115,6 +115,15 @@ void initialize() {
             // log position JSON to the terminal
             printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+            // if (pros::usd::is_installed()) {
+            //     FILE* file = fopen("/usd/data.json", "a");
+            //     if (file) {
+            //         fprintf(file,
+            //                 "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+            //                 chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+            //         fclose(file);
+            //     }
+            // }
             // delay to save resources
             delay(100);
         }
