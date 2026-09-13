@@ -21,9 +21,10 @@ pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
 pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
 
 
-// clamp piston, ADI port H
-pros::adi::Pneumatics clamp('a', false);
-
+// claw piston, ADI port H
+pros::adi::Pneumatics claw('a', false);
+pros::adi::Pneumatics salute('b', false);
+pros::adi::Pneumatics taiwan('c', false);
 
 pros::Imu imu(20);
 
@@ -101,6 +102,9 @@ void initialize() {
     chassis.calibrate(); // calibrate sensors
 
     // thread for brain screen and position logging
+    liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    liftControl(liftStates[0]);
+    
     pros::Task screenTask([&]() {
         
         while (true) {
@@ -127,7 +131,6 @@ chassis.moveToPoint(0, 0, 5000);
 
 void opcontrol() {
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-    liftControl(liftStates[0]);
 
 
     pros::Task mechanismTask([]() {
@@ -159,18 +162,28 @@ void opcontrol() {
             wasJogging = isJogging;
 
 
-            static double clampSensorSuppressMs = 0;
+            static double clawSensorSuppressMs = 0;
             if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
-                clamp.toggle();
-                clampSensorSuppressMs = 3000;
+                claw.toggle();
+                clawSensorSuppressMs = 3000;
+            }
+
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+                salute.set_value(true);
+            } else {
+                salute.set_value(false);
+            }
+
+            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
+                taiwan.toggle();
             }
 
             static bool objectWasClose = false;
             bool objectIsClose = liftDistance.get_distance() < CLAW_CLOSE_DISTANCE_MM;
-            if (clampSensorSuppressMs > 0) {
-                clampSensorSuppressMs -= 10;
+            if (clawSensorSuppressMs > 0) {
+                clawSensorSuppressMs -= 10;
             } else if (objectIsClose && !objectWasClose) {
-                clamp.set_value(true);
+                claw.set_value(true);
                 delay(200);
                 liftControl(liftStates[1]);
             }
