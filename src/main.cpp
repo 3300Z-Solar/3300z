@@ -107,7 +107,6 @@ void initialize() {
     liftControl(liftStates[0]);
     
     pros::Task screenTask([&]() {
-        /*
         char logPath[32] = "/usd/1.json";
         if (pros::usd::is_installed()) {
             int n = 1;
@@ -120,7 +119,6 @@ void initialize() {
                 n++;
             } while (n < 10000);
         }
-        */
 
         while (true) {
             // print robot location to the brain screen
@@ -130,15 +128,15 @@ void initialize() {
             // log position JSON to the terminal
             printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
-            // if (pros::usd::is_installed()) {
-            //     FILE* file = fopen(logPath, "a");
-            //     if (file) {
-            //         fprintf(file,
-            //                 "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-            //                 chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
-            //         fclose(file);
-            //     }
-            // }
+            if (pros::usd::is_installed()) {
+                FILE* file = fopen(logPath, "a");
+                if (file) {
+                    fprintf(file,
+                            "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+                            chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+                    fclose(file);
+                }
+            }
             // delay to save resources
             delay(100);
         }
