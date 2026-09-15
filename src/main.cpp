@@ -5,6 +5,8 @@
 #include "pros/rotation.hpp"
 #include "macro.hpp"
 #include <algorithm>
+#include <cstdio>
+
 
 
 using pros::delay;
@@ -106,7 +108,19 @@ void initialize() {
     liftControl(liftStates[0]);
     
     pros::Task screenTask([&]() {
-        
+        char logPath[32] = "/usd/1.json";
+        if (pros::usd::is_installed()) {
+            int n = 1;
+            FILE* file;
+            do {
+                snprintf(logPath, sizeof(logPath), "/usd/%d.json", n);
+                file = fopen(logPath, "r");
+                if (file) fclose(file);
+                else break;
+                n++;
+            } while (n < 10000);
+        }
+
         while (true) {
             // print robot location to the brain screen
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
@@ -115,15 +129,15 @@ void initialize() {
             // log position JSON to the terminal
             printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
-            // if (pros::usd::is_installed()) {
-            //     FILE* file = fopen("/usd/data.json", "a");
-            //     if (file) {
-            //         fprintf(file,
-            //                 "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-            //                 chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
-            //         fclose(file);
-            //     }
-            // }
+            if (pros::usd::is_installed()) {
+                FILE* file = fopen(logPath, "a");
+                if (file) {
+                    fprintf(file,
+                            "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+                            chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+                    fclose(file);
+                }
+            }
             // delay to save resources
             delay(100);
         }
