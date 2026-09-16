@@ -103,41 +103,24 @@ lemlib::Chassis chassis(drivetrain,
 );
 
 void initialize() {
-    pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
 
-    // thread for brain screen and position logging
+    // thread for position logging
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     liftControl(liftStates[0]);
-    
-    pros::Task screenTask([&]() {
-        char logPath[32] = "/usd/1.json";
-        if (pros::usd::is_installed()) {
-            int n = 1;
-            FILE* file;
-            do {
-                snprintf(logPath, sizeof(logPath), "/usd/%d.json", n);
-                file = fopen(logPath, "r");
-                if (file) fclose(file);
-                else break;
-                n++;
-            } while (n < 10000);
-        }
 
+    pros::Task loggingTask([]() {
+        const char* logPath = "/usd/pose.json";
         while (true) {
-            // print robot location to the brain screen
-            pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
-            pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
-            pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            // log position JSON to the terminal
-            printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-                   chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+            // log position JSON to the SD card
             if (pros::usd::is_installed()) {
                 FILE* file = fopen(logPath, "a");
                 if (file) {
+                    printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
                     fprintf(file,
-                            "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-                            chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+                        "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+                        chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis()
+                    );
                     fclose(file);
                 }
             }
@@ -247,11 +230,6 @@ void opcontrol() {
             }
 
             int liftPosDeg = liftRot.get_position() / 100;
-            static int lastPrintedPos = -999999;
-            if (printCounter % 50 == 0 && liftPosDeg != lastPrintedPos) {
-                pros::lcd::print(3, "lift pos: %d", liftPosDeg);
-                lastPrintedPos = liftPosDeg;
-            }
             if (printCounter % 50 == 0) {
                 if (SHOW_LIFT_POS_DEBUG) {
                     controller.print(0, 0, "lift pos: %d", liftPosDeg);
