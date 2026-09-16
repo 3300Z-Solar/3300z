@@ -111,17 +111,17 @@ void initialize() {
 
     pros::Task loggingTask([]() {
         const char* logPath = "/usd/pose.json";
+        FILE* file = fopen(logPath, "a");
         while (true) {
             // log position JSON to the SD card
             if (pros::usd::is_installed()) {
-                FILE* file = fopen(logPath, "a");
                 if (file) {
-                    printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
-                    fprintf(file,
-                        "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-                        chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis()
-                    );
-                    fclose(file);
+                printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+                fprintf(file,
+                    "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n IM GONNA GOOONNNN,.",
+                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis()
+                );
+                fflush(file);
                 }
             }
             // delay to save resources
