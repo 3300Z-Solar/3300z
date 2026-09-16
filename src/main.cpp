@@ -19,14 +19,17 @@ constexpr bool SHOW_LIFT_POS_DEBUG = false;
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
-pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
+// pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
+// pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
+pros::MotorGroup rightMotors({6, 7, -8}, pros::MotorGearset::blue);
+pros::MotorGroup leftMotors({-5, -3, 1}, pros::MotorGearset::blue);
+
 
 
 // claw piston, ADI port H
 pros::adi::Pneumatics claw('a', false);
-pros::adi::Pneumatics salute('b', false);
-pros::adi::Pneumatics taiwan('c', false);
+pros::adi::Pneumatics salute('c', false);
+pros::adi::Pneumatics taiwan('b', false);
 
 pros::Imu imu(20);
 
@@ -37,7 +40,7 @@ int CLAW_CLOSE_DISTANCE_MM = 30; // TODO: tune this - claw auto-closes when an o
 
 // tracking wheels
 pros::Rotation horizontalEnc(9);
-pros::Rotation verticalEnc(-10);
+pros::Rotation verticalEnc(10);
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 0.38);
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
@@ -100,41 +103,24 @@ lemlib::Chassis chassis(drivetrain,
 );
 
 void initialize() {
-    pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
 
-    // thread for brain screen and position logging
+    // thread for position logging
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     liftControl(liftStates[0]);
-    
-    pros::Task screenTask([&]() {
-        char logPath[32] = "/usd/1.json";
-        if (pros::usd::is_installed()) {
-            int n = 1;
-            FILE* file;
-            do {
-                snprintf(logPath, sizeof(logPath), "/usd/%d.json", n);
-                file = fopen(logPath, "r");
-                if (file) fclose(file);
-                else break;
-                n++;
-            } while (n < 10000);
-        }
 
+    pros::Task loggingTask([]() {
+        const char* logPath = "/usd/pose.json";
         while (true) {
-            // print robot location to the brain screen
-            pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
-            pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
-            pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            // log position JSON to the terminal
-            printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-                   chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+            // log position JSON to the SD card
             if (pros::usd::is_installed()) {
                 FILE* file = fopen(logPath, "a");
                 if (file) {
+                    printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
                     fprintf(file,
-                            "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-                            chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+                        "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+                        chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis()
+                    );
                     fclose(file);
                 }
             }
@@ -149,9 +135,29 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-chassis.setPose({0,0,0});
-chassis.moveToPoint(0, 10, 5000);
-
+chassis.moveToPoint(0, 0,10);
+delay(10);
+salute.set_value(true);
+delay(200);
+chassis.moveToPoint(-1.59, -6, 560, {.forwards = false});
+delay(270);
+salute.set_value(false);
+chassis.turnToHeading(-50, 360);
+delay(80);
+liftControl(liftStates[1]);
+delay(80);
+chassis.moveToPoint(3.7, 7.7, 1000);
+delay(300);
+liftControl(liftStates[0]);
+claw.set_value(true);
+chassis.moveToPoint(7, -4 ,300, {.forwards = false, .maxSpeed = 127});
+chassis.moveToPose(27.9, 15.5, 45, 1600, {.maxSpeed = 127});
+delay(1600);
+claw.set_value(false);
+delay(900);
+liftControl(liftStates[1]);
+chassis.turnToHeading(140, 800);
+chassis.moveToPose(41.15, -10, 160.7, 1800, {.maxSpeed = 127});
 }
 
 void opcontrol() {
@@ -208,7 +214,7 @@ void opcontrol() {
             if (clawSensorSuppressMs > 0) {
                 clawSensorSuppressMs -= 10;
             } else if (objectIsClose && !objectWasClose) {
-                claw.set_value(true);
+                claw.set_value(false);
                 delay(200);
                 liftControl(liftStates[1]);
             }
@@ -224,11 +230,6 @@ void opcontrol() {
             }
 
             int liftPosDeg = liftRot.get_position() / 100;
-            static int lastPrintedPos = -999999;
-            if (printCounter % 50 == 0 && liftPosDeg != lastPrintedPos) {
-                pros::lcd::print(3, "lift pos: %d", liftPosDeg);
-                lastPrintedPos = liftPosDeg;
-            }
             if (printCounter % 50 == 0) {
                 if (SHOW_LIFT_POS_DEBUG) {
                     controller.print(0, 0, "lift pos: %d", liftPosDeg);

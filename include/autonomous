@@ -1,8 +1,31 @@
+/*
 Autos:
 
 Right Side:
+chassis.setPose({0,0,-30.6});
+
+//move to toggle
+//salute.set_value(true); //lift wing
+chassis.moveToPose(2.24, 5, 20, 500); //moving to toggle
+delay(500);
+//salute.set_value(false); //lower wing
+
+liftControl(liftStates[1]); //lift to score
+
+chassis.moveToPose(1.19, -9.95, -12.71, 800, {.forwards = false}); //moving to the goal & flipping the toggle
+delay(1200);
+chassis.moveToPose(0, 5, 60, 900);
+chassis.moveToPoint(-17, -25.27, 5000, {.forwards = false});
+// chassis.moveToPose(-27.97, -0.64, 167.73, 5000, {.forwards = false});
+// chassis.moveToPose(-14.17, -13.78, -51.99, 5000, {.forwards = false});
+// chassis.moveToPose(9.12, -24.28, -56.52, 5000, {.forwards = false});
+// chassis.moveToPose(-14.17, -13.78, -51.99, 500);
+// chassis.moveToPose(20.550, -20.43, -98.07, 5000, {.forwards = false});
+// chassis.moveToPose(12.39, -19.05, -189.66, 5000, {.forwards = false});
+
 
 Close Side:
 
 Programming Skills
 
+*/
