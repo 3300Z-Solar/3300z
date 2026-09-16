@@ -19,8 +19,11 @@ constexpr bool SHOW_LIFT_POS_DEBUG = false;
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
-pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
+// pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
+// pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
+pros::MotorGroup rightMotors({6, 7, -8}, pros::MotorGearset::blue);
+pros::MotorGroup leftMotors({-5, -3, 1}, pros::MotorGearset::blue);
+
 
 
 // claw piston, ADI port H
@@ -37,7 +40,7 @@ int CLAW_CLOSE_DISTANCE_MM = 30; // TODO: tune this - claw auto-closes when an o
 
 // tracking wheels
 pros::Rotation horizontalEnc(9);
-pros::Rotation verticalEnc(-10);
+pros::Rotation verticalEnc(10);
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 0.38);
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
@@ -149,31 +152,29 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-chassis.moveToPose(0, 0, -30.2,10);
+chassis.moveToPoint(0, 0,10);
 delay(10);
 salute.set_value(true);
 delay(200);
-chassis.moveToPose(1.59, 6, 20.06, 560, {.forwards = true});
-delay(300);
+chassis.moveToPoint(-1.59, -6, 560, {.forwards = false});
+delay(270);
 salute.set_value(false);
-chassis.turnToHeading(-60, 400);
-chassis.moveToPose(1.7, -8.8, -2.30, 1200, {.forwards = false, .maxSpeed = 127});
+chassis.turnToHeading(-50, 360);
+delay(80);
 liftControl(liftStates[1]);
-delay(100);
+delay(80);
+chassis.moveToPoint(3.7, 7.7, 1000);
+delay(300);
 liftControl(liftStates[0]);
-delay(100);
 claw.set_value(true);
-delay(200);
-chassis.moveToPoint(-10, 0.28, 300, {.forwards = true, .maxSpeed = 127});
-chassis.moveToPose(-14.9, -22, 28, 1900, {.forwards = false});
-delay(2000);
+chassis.moveToPoint(7, -4 ,300, {.forwards = false, .maxSpeed = 127});
+chassis.moveToPose(27.9, 15.5, 45, 1600, {.maxSpeed = 127});
+delay(1600);
 claw.set_value(false);
-// chassis.moveToPose(-38.48, -8.92, 172.93, 5000, {.forwards = false});
-// chassis.moveToPose(-24.24, -40.93, 316.02, 5000, {.forwards = false});
-// chassis.moveToPose(-3.64, -53.97, 298.88, 5000, {.forwards = false});
-// chassis.moveToPose(-16.89, -47.47, 299.64, 5000, {.forwards = true});
-// chassis.moveToPose(6.64, -45.26, 249.25, 5000, {.forwards = false});
-// chassis.moveToPose(6.32, -39.91, 145.93, 5000, {.forwards = false});
+delay(900);
+liftControl(liftStates[1]);
+chassis.turnToHeading(140, 800);
+chassis.moveToPose(41.15, -10, 160.7, 1800, {.maxSpeed = 127});
 }
 
 void opcontrol() {
@@ -230,7 +231,7 @@ void opcontrol() {
             if (clawSensorSuppressMs > 0) {
                 clawSensorSuppressMs -= 10;
             } else if (objectIsClose && !objectWasClose) {
-                claw.set_value(true);
+                claw.set_value(false);
                 delay(200);
                 liftControl(liftStates[1]);
             }
