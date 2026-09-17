@@ -137,6 +137,7 @@ void competition_initialize() {}
 void autonomous() {
 chassis.moveToPoint(0, 0,10);
 delay(10);
+// toggle
 salute.set_value(true);
 delay(200);
 chassis.moveToPoint(-1.59, -6, 560, {.forwards = false});
@@ -146,18 +147,32 @@ chassis.turnToHeading(-50, 360);
 delay(80);
 liftControl(liftStates[1]);
 delay(80);
-chassis.moveToPoint(3.7, 7.7, 1000);
+// first pin
+chassis.moveToPoint(4.1, 8.1, 1000);
 delay(300);
 liftControl(liftStates[0]);
 claw.set_value(true);
-chassis.moveToPoint(7, -4 ,300, {.forwards = false, .maxSpeed = 127});
-chassis.moveToPose(27.9, 15.5, 45, 1600, {.maxSpeed = 127});
-delay(1600);
+// back up
+chassis.moveToPoint(9, -4 ,300, {.forwards = false, .maxSpeed = 127});
+// second pin
+chassis.moveToPose(26.6, 18, 45, 2500, {.maxSpeed = 127});
+delay(1610);
 claw.set_value(false);
-delay(900);
-liftControl(liftStates[1]);
-chassis.turnToHeading(140, 800);
-chassis.moveToPose(41.15, -10, 160.7, 1800, {.maxSpeed = 127});
+delay(300);
+liftControl(liftStates[2]);
+chassis.turnToHeading(140, 600);
+// third pin
+chassis.moveToPose(39.3, -9, 160.7, 1800, {.maxSpeed = 127});
+delay(1800);
+liftControl(liftStates[3]);
+claw.set_value(true);
+// back up
+chassis.moveToPose(26.6, 18.3, 45, 800, {.forwards = false});
+// fourth pin
+liftControl(liftStates[0]);
+chassis.moveToPose(19, 31, -45, 2500);
+delay(2100);
+claw.set_value(false);
 }
 
 void opcontrol() {
@@ -223,6 +238,7 @@ void opcontrol() {
 
             if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
                 liftControl(liftStates[0]);
+                claw.set_value(false);
             }
 
             if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {

@@ -4,7 +4,7 @@
 
 inline pros::MotorGroup liftMotors({4, -2}, pros::MotorGearset::red); // lift motor group - ports 4, 2 (reversed)
 inline pros::Rotation liftRot(19);
-inline int liftStates[2] = {105, 130};
+inline int liftStates[4] = {105, 130, 160, 125};
 // [0] = bottom / starting pos (used by R2 homing)
 // [1] = slightly above ground, after picking up an object
 inline int currState = 0;
