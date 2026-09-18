@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "primary",
+    "project_name": "prayers",
     "target": "v5",
     "templates": {
       "LemLib": {

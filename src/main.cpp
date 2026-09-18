@@ -58,9 +58,9 @@ lemlib::ControllerSettings linearController(14,
                                             0, 
                                             126,
                                             3, 
-                                            1, 
+                                            0.5, 
                                             100, 
-                                            3, 
+                                            1.5, 
                                             500, 
                                             94 
 );
@@ -70,9 +70,9 @@ lemlib::ControllerSettings angularController(2.3, // proportional gain (kP)
                                              0, // integral gain (kI)
                                              28, // derivative gain (kD)
                                              3, // anti windup
-                                             1, // small error range, in degrees
+                                             0.5, // small error range, in degrees
                                              100, // small error range timeout, in milliseconds
-                                             3, // large error range, in degrees
+                                             1.5, // large error range, in degrees
                                              500, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
@@ -108,7 +108,6 @@ void initialize() {
 
     // thread for brain screen and position logging
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-    liftControl(liftStates[0]);
     
     pros::Task screenTask([&]() {
         char logPath[32] = "/usd/1.json";
@@ -154,27 +153,52 @@ void competition_initialize() {}
 void autonomous() {
 chassis.moveToPoint(0, 0,10);
 delay(10);
+// toggle
 salute.set_value(true);
 delay(200);
-chassis.moveToPoint(-1.59, -6, 560, {.forwards = false});
-delay(270);
+chassis.moveToPoint(-2, -8, 750, {.forwards = false});
+delay(360);
 salute.set_value(false);
 chassis.turnToHeading(-50, 360);
-delay(80);
+delay(120);
 liftControl(liftStates[1]);
-delay(80);
-chassis.moveToPoint(3.7, 7.7, 1000);
-delay(300);
+// first pin
+chassis.moveToPoint(-1.2, 9.4, 820, {.maxSpeed = 127});
+delay(200);
 liftControl(liftStates[0]);
 claw.set_value(true);
-chassis.moveToPoint(7, -4 ,300, {.forwards = false, .maxSpeed = 127});
-chassis.moveToPose(27.9, 15.5, 45, 1600, {.maxSpeed = 127});
-delay(1600);
+// // back up
+chassis.moveToPoint(5, -4 ,300, {.forwards = false, .maxSpeed = 127});
+// second pin
+chassis.moveToPose(31.6, 25, 46, 1800, {.maxSpeed = 127});
+delay(1573);
 claw.set_value(false);
-delay(900);
+delay(100);
+liftControl(liftStates[2]);
+chassis.turnToHeading(140, 300);
+// third pin
+chassis.moveToPose(46.6, -24, 159, 1300, {.maxSpeed = 120});
+delay(1600);
 liftControl(liftStates[1]);
-chassis.turnToHeading(140, 800);
-chassis.moveToPose(41.15, -10, 160.7, 1800, {.maxSpeed = 127});
+delay(300);
+claw.set_value(true);
+delay(850);
+chassis.moveToPoint(28.45, 35.2, 80, {.forwards  = false});
+// back up
+chassis.moveToPose(26.6, 18.3, 45, 800, {.forwards = false});
+// fourth pin
+liftControl(liftStates[0]);
+chassis.moveToPose(7.7, 33.7, -50, 1500, {.maxSpeed = 115});
+delay(1720);
+claw.set_value(false);
+delay(100);
+liftControl(liftStates[3]);
+chassis.moveToPoint(0, 4, 1500, {.maxSpeed = 127});
+delay(1300);
+liftControl(liftStates[4]);
+delay(300);
+claw.set_value(true);
+chassis.moveToPoint(8.7, 30, 1000, {.forwards = false});
 }
 
 void opcontrol() {
@@ -232,18 +256,20 @@ void opcontrol() {
                 clawSensorSuppressMs -= 10;
             } else if (objectIsClose && !objectWasClose) {
                 claw.set_value(false);
-                delay(200);
-                liftControl(liftStates[1]);
             }
             objectWasClose = objectIsClose;
 
 
             if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
                 liftControl(liftStates[0]);
+                delay(10);
+                liftControl(liftStates[0]);
             }
 
-            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-                liftControl(liftStates[1]);
+            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+                liftControl(liftStates[5]);
+                delay(10);
+                liftControl(liftStates[5]);
             }
 
             int liftPosDeg = liftRot.get_position() / 100;
