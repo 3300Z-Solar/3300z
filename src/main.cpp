@@ -153,52 +153,11 @@ void competition_initialize() {}
 void autonomous() {
 chassis.moveToPoint(0, 0,10);
 delay(10);
+liftControl(liftStates[1]);
 // toggle
-salute.set_value(true);
-delay(200);
-chassis.moveToPoint(-2, -8, 750, {.forwards = false});
-delay(360);
-salute.set_value(false);
-chassis.turnToHeading(-50, 360);
-delay(120);
-liftControl(liftStates[1]);
-// first pin
-chassis.moveToPoint(-1.2, 9.4, 820, {.maxSpeed = 127});
-delay(200);
+chassis.moveToPoint(0, 6,2000, {.maxSpeed = 80});
+delay(900);
 liftControl(liftStates[0]);
-claw.set_value(true);
-// // back up
-chassis.moveToPoint(5, -4 ,300, {.forwards = false, .maxSpeed = 127});
-// second pin
-chassis.moveToPose(31.6, 25, 46, 1800, {.maxSpeed = 127});
-delay(1573);
-claw.set_value(false);
-delay(100);
-liftControl(liftStates[2]);
-chassis.turnToHeading(140, 300);
-// third pin
-chassis.moveToPose(46.6, -24, 159, 1300, {.maxSpeed = 120});
-delay(1600);
-liftControl(liftStates[1]);
-delay(300);
-claw.set_value(true);
-delay(850);
-chassis.moveToPoint(28.45, 35.2, 80, {.forwards  = false});
-// back up
-chassis.moveToPose(26.6, 18.3, 45, 800, {.forwards = false});
-// fourth pin
-liftControl(liftStates[0]);
-chassis.moveToPose(7.7, 33.7, -50, 1500, {.maxSpeed = 115});
-delay(1720);
-claw.set_value(false);
-delay(100);
-liftControl(liftStates[3]);
-chassis.moveToPoint(0, 4, 1500, {.maxSpeed = 127});
-delay(1300);
-liftControl(liftStates[4]);
-delay(300);
-claw.set_value(true);
-chassis.moveToPoint(8.7, 30, 1000, {.forwards = false});
 }
 
 void opcontrol() {
