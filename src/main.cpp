@@ -26,15 +26,9 @@ pros::MotorGroup leftMotors({-5, -3, 1}, pros::MotorGearset::blue);
 
 
 
-// claw piston, ADI port H
-pros::adi::Pneumatics claw('a', false);
-pros::adi::Pneumatics salute('c', false);
 pros::adi::Pneumatics taiwan('b', false);
 
 pros::Imu imu(20);
-
-pros::Distance liftDistance(18); // detects when an object is in the lift
-int CLAW_CLOSE_DISTANCE_MM = 30; // TODO: tune this - claw auto-closes when an object is closer than this
 
 
 
@@ -151,13 +145,32 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-chassis.moveToPoint(0, 0,10);
+chassis.moveToPoint(0, 0, 0);
 delay(10);
+chassis.moveToPoint(-1, -9, 750, {.forwards = false});
+delay(360);
+chassis.turnToHeading(-50, 360);
+delay(120);
 liftControl(liftStates[1]);
-// toggle
-chassis.moveToPoint(0, 6,2000, {.maxSpeed = 80});
-delay(900);
+// first pin
+chassis.moveToPoint(-1.2, 9.4, 820, {.maxSpeed = 127});
+delay(200);
 liftControl(liftStates[0]);
+delay(100);
+liftControl(liftStates[1]);
+// // back up
+chassis.moveToPoint(9, 3 ,800, {.forwards = false, .maxSpeed = 127});
+// second pin
+chassis.moveToPoint(-8, 5, 800, {.maxSpeed = 80});
+liftControl(liftStates[0]);
+chassis.moveToPoint(-10, 15, 1700, {.maxSpeed = 60});
+chassis.moveToPoint(-16.9, 22.2, 2000, {.maxSpeed = 80});
+delay(800);
+delay(500);
+liftControl(liftStates[2]);
+chassis.moveToPoint(-1.2, 9.4, 1000, {.maxSpeed = 97});
+delay(600);
+liftControl(liftStates[1]);
 }
 
 void opcontrol() {
@@ -193,31 +206,9 @@ void opcontrol() {
             wasJogging = isJogging;
 
 
-            static double clawSensorSuppressMs = 0;
-            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1)) {
-                claw.toggle();
-                clawSensorSuppressMs = 3000;
-            }
-
-            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-                salute.set_value(true);
-            } else {
-                salute.set_value(false);
-            }
-
             if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
                 taiwan.toggle();
             }
-
-            static bool objectWasClose = false;
-            bool objectIsClose = liftDistance.get_distance() < CLAW_CLOSE_DISTANCE_MM;
-            if (clawSensorSuppressMs > 0) {
-                clawSensorSuppressMs -= 10;
-            } else if (objectIsClose && !objectWasClose) {
-                claw.set_value(false);
-            }
-            objectWasClose = objectIsClose;
-
 
             if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
                 liftControl(liftStates[0]);
