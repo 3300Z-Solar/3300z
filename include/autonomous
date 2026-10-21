@@ -54,25 +54,49 @@ chassis.moveToPoint(8.7, 30, 1000, {.forwards = false});
 Close Side:
 chassis.moveToPoint(0, 0,10);
 delay(10);
+liftControl(liftStates[1]);
+// toggle
+chassis.moveToPoint(0, 6,2000, {.maxSpeed = 80});
+delay(900);
+liftControl(liftStates[0]);
+
+Programming Skills
+
+right side:
+chassis.moveToPoint(0, 0, 0);
+delay(10);
 // toggle
 salute.set_value(true);
 delay(200);
-chassis.moveToPoint(-1.59, -6, 560, {.forwards = false});
-delay(330);
+chassis.moveToPoint(-1, -9, 750, {.forwards = false});
+delay(360);
 salute.set_value(false);
 chassis.turnToHeading(-50, 360);
-delay(80);
+delay(120);
 liftControl(liftStates[1]);
 // first pin
-chassis.moveToPoint(21, 2, 2020, {.maxSpeed = 100});
-delay(180);
+chassis.moveToPoint(-1.2, 9.4, 820, {.maxSpeed = 127});
+delay(200);
 liftControl(liftStates[0]);
 claw.set_value(true);
+delay(100);
+liftControl(liftStates[1]);
+// // back up
+chassis.moveToPoint(9, 3 ,800, {.forwards = false, .maxSpeed = 127});
+// second pin
+chassis.moveToPoint(-8, 5, 800, {.maxSpeed = 80});
+liftControl(liftStates[0]);
+chassis.moveToPoint(-10, 15, 1700, {.maxSpeed = 60});
+chassis.moveToPoint(-16.9, 22.2, 2000, {.maxSpeed = 80});
+delay(800);
+claw.set_value(false);
+delay(500);
+liftControl(liftStates[2]);
+chassis.moveToPoint(-1.2, 9.4, 1000, {.maxSpeed = 97});
+delay(600);
+liftControl(liftStates[1]);
+claw.set_value(true);
+﻿
 
-chassis.moveToPoint(33.8, 12.55, 2020);
-chassis.moveToPoint(16, 2, 2020, {.forwards = false});
-chassis.moveToPoint(18.52, -11.38, 2000);
-
-Programming Skills
 
 */

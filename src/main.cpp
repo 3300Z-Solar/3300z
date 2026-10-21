@@ -11,30 +11,26 @@
 
 using pros::delay;
 
-// flip to true when liftStates need re-measuring/re-tuning; shows lift
-// position on the controller instead of lift motor temperature
-constexpr bool SHOW_LIFT_POS_DEBUG = false;
-
 // controller
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor groups
 // pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
 // pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
-pros::MotorGroup rightMotors({6, 7, -8}, pros::MotorGearset::blue);
-pros::MotorGroup leftMotors({-5, -3, 1}, pros::MotorGearset::blue);
+pros::MotorGroup rightMotors({9, 7, -8}, pros::MotorGearset::blue);
+pros::MotorGroup leftMotors({-4, -2, 3}, pros::MotorGearset::blue);
+pros::MotorGroup claw({20}, pros::MotorGearset::green);
+pros::MotorGroup puhtongue({-5}, pros::MotorGearset::green);
+pros::adi::Pneumatics salute('h', false);
 
 
-
-pros::adi::Pneumatics taiwan('b', false);
-
-pros::Imu imu(20);
+pros::Imu imu(14);
 
 
 
 // tracking wheels
-pros::Rotation horizontalEnc(9);
-pros::Rotation verticalEnc(10);
+pros::Rotation horizontalEnc(-15);
+pros::Rotation verticalEnc(6);
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 0.38);
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
@@ -48,26 +44,26 @@ lemlib::Drivetrain drivetrain(&leftMotors,
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(14, 
+lemlib::ControllerSettings linearController(8, 
                                             0, 
-                                            126,
-                                            3, 
-                                            0.5, 
-                                            100, 
-                                            1.5, 
-                                            500, 
-                                            94 
+                                            10,
+                                            0, 
+                                            0, 
+                                            0, 
+                                            0, 
+                                            0, 
+                                            0
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController(2.3, // proportional gain (kP)
+lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0, // integral gain (kI)
-                                             28, // derivative gain (kD)
-                                             3, // anti windup
-                                             0.5, // small error range, in degrees
-                                             100, // small error range timeout, in milliseconds
-                                             1.5, // large error range, in degrees
-                                             500, // large error range timeout, in milliseconds
+                                             21, // derivative gain (kD)
+                                             0, // anti windup
+                                             0, // small error range, in degrees
+                                             0, // small error range timeout, in milliseconds
+                                             0, // large error range, in degrees
+                                             0, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
 
@@ -145,36 +141,16 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-chassis.moveToPoint(0, 0, 0);
-delay(10);
-chassis.moveToPoint(-1, -9, 750, {.forwards = false});
-delay(360);
-chassis.turnToHeading(-50, 360);
-delay(120);
-liftControl(liftStates[1]);
-// first pin
-chassis.moveToPoint(-1.2, 9.4, 820, {.maxSpeed = 127});
-delay(200);
-liftControl(liftStates[0]);
-delay(100);
-liftControl(liftStates[1]);
-// // back up
-chassis.moveToPoint(9, 3 ,800, {.forwards = false, .maxSpeed = 127});
-// second pin
-chassis.moveToPoint(-8, 5, 800, {.maxSpeed = 80});
-liftControl(liftStates[0]);
-chassis.moveToPoint(-10, 15, 1700, {.maxSpeed = 60});
-chassis.moveToPoint(-16.9, 22.2, 2000, {.maxSpeed = 80});
-delay(800);
-delay(500);
-liftControl(liftStates[2]);
-chassis.moveToPoint(-1.2, 9.4, 1000, {.maxSpeed = 97});
-delay(600);
-liftControl(liftStates[1]);
+    // set position to x:0, y:0, heading:0
+    chassis.setPose(0, 0, 0);
+    // turn to face heading 90 with a very long timeout
+    chassis.turnToHeading(90, 100000);
+
 }
 
 void opcontrol() {
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    
 
 
     pros::Task mechanismTask([]() {
@@ -184,10 +160,30 @@ void opcontrol() {
         while (true) {
 
             double liftJogTarget = 0;
-            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-                liftJogTarget = 11000;
-            } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-                liftJogTarget = -8000;
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+                liftJogTarget = 7000;
+            } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+                liftJogTarget = -10000;
+            }
+
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+                puhtongue.move_voltage(12000);
+            } else {
+                puhtongue.brake();
+            }
+
+            // if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+            //     salute.set_value(true);
+            // } else {
+            //     salute.set_value(false);
+            // }
+
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+                claw.move_voltage(12000);
+            } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+                claw.move_voltage(-12000);
+            } else {
+                claw.brake();
             }
 
             static bool wasJogging = false;
@@ -205,43 +201,16 @@ void opcontrol() {
             }
             wasJogging = isJogging;
 
-
-            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)) {
-                taiwan.toggle();
-            }
-
-            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
-                liftControl(liftStates[0]);
-                delay(10);
-                liftControl(liftStates[0]);
-            }
-
-            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
-                liftControl(liftStates[5]);
-                delay(10);
-                liftControl(liftStates[5]);
-            }
-
-            int liftPosDeg = liftRot.get_position() / 100;
-            static int lastPrintedPos = -999999;
-            if (printCounter % 50 == 0 && liftPosDeg != lastPrintedPos) {
-                pros::lcd::print(3, "lift pos: %d", liftPosDeg);
-                lastPrintedPos = liftPosDeg;
-            }
             if (printCounter % 50 == 0) {
-                if (SHOW_LIFT_POS_DEBUG) {
-                    controller.print(0, 0, "lift pos: %d", liftPosDeg);
-                } else {
-                    int liftHottest = (int) std::max(liftMotors.get_temperature(0), liftMotors.get_temperature(1));
-                    double driveHottestD = leftMotors.get_temperature(0);
-                    driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(1));
-                    driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(2));
-                    driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(0));
-                    driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(1));
-                    driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(2));
-                    int driveHottest = (int) driveHottestD;
-                    controller.print(0, 0, "L:%dC,D:%dC", liftHottest, driveHottest);
-                }
+                int liftHottest = (int) std::max(liftMotors.get_temperature(0), liftMotors.get_temperature(1));
+                double driveHottestD = leftMotors.get_temperature(0);
+                driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(1));
+                driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(2));
+                driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(0));
+                driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(1));
+                driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(2));
+                int driveHottest = (int) driveHottestD;
+                controller.print(0, 0, "L:%dC,D:%dC", liftHottest, driveHottest);
             }
             printCounter++;
 
