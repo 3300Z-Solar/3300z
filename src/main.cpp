@@ -11,25 +11,34 @@
 
 using pros::delay;
 
+// flip to true when liftStates need re-measuring/re-tuning; shows lift
+// position on the controller instead of lift motor temperature
+constexpr bool SHOW_LIFT_POS_DEBUG = false;
+
 // controller
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor groups
 // pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
 // pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
-pros::MotorGroup rightMotors({9, 7, -8}, pros::MotorGearset::blue);
-pros::MotorGroup leftMotors({-4, -2, 3}, pros::MotorGearset::blue);
+pros::MotorGroup rightMotors({7, 9, -8}, pros::MotorGearset::blue);
+pros::MotorGroup leftMotors({-4, 3, -2}, pros::MotorGearset::blue);
+pros::MotorGroup puhTung({-5}, pros::MotorGearset::green);
 pros::MotorGroup claw({20}, pros::MotorGearset::green);
-pros::MotorGroup puhtongue({-5}, pros::MotorGearset::green);
+pros::MotorGroup toggle({5}, pros::MotorGearset::green);
+
+// claw piston, ADI port H
 pros::adi::Pneumatics salute('h', false);
 
-
 pros::Imu imu(14);
+
+pros::Distance liftDistance(18); // detects when an object is in the lift
+//int CLAW_CLOSE_DISTANCE_MM = 30; // TODO: tune this - claw auto-closes when an object is closer than this
 
 
 
 // tracking wheels
-pros::Rotation horizontalEnc(-15);
+pros::Rotation horizontalEnc(15);
 pros::Rotation verticalEnc(6);
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 0.38);
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
@@ -46,24 +55,24 @@ lemlib::Drivetrain drivetrain(&leftMotors,
 // lateral motion controller
 lemlib::ControllerSettings linearController(8, 
                                             0, 
-                                            45,
-                                            0, 
-                                            0, 
-                                            10000, 
-                                            0, 
-                                            10000, 
-                                            0
+                                            58,
+                                            3, 
+                                            0.5, 
+                                            100, 
+                                            1.5, 
+                                            500, 
+                                            0 
 );
 
 // angular motion controller
 lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0, // integral gain (kI)
                                              13.875, // derivative gain (kD)
-                                             0, // anti windup
-                                             0, // small error range, in degrees
-                                             0, // small error range timeout, in milliseconds
-                                             0, // large error range, in degrees
-                                             0, // large error range timeout, in milliseconds
+                                             3, // anti windup
+                                             0.5, // small error range, in degrees
+                                             100, // small error range timeout, in milliseconds
+                                             1.5, // large error range, in degrees
+                                             500, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
 
@@ -93,45 +102,29 @@ lemlib::Chassis chassis(drivetrain,
 );
 
 void initialize() {
-    pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
 
-    // thread for brain screen and position logging
+    // thread for position logging
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-    
-    pros::Task screenTask([&]() {
-        char logPath[32] = "/usd/1.json";
-        if (pros::usd::is_installed()) {
-            int n = 1;
-            FILE* file;
-            do {
-                snprintf(logPath, sizeof(logPath), "/usd/%d.json", n);
-                file = fopen(logPath, "r");
-                if (file) fclose(file);
-                else break;
-                n++;
-            } while (n < 10000);
-        }
+    // liftControl(liftStates[0]);
 
+    pros::Task loggingTask([]() {
+        const char* logPath = "/usd/pose.json";
+        FILE* file = fopen(logPath, "a");
         while (true) {
-            // print robot location to the brain screen
-            // pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
-            // pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
-            // pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
-            // log position JSON to the terminal
-            printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-                   chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+            // log position JSON to the SD card
             if (pros::usd::is_installed()) {
-                FILE* file = fopen(logPath, "a");
                 if (file) {
-                    fprintf(file,
-                            "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-                            chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
-                    fclose(file);
+                printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+                fprintf(file,
+                    "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n IM GONNA GOOONNNN,.",
+                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis()
+                );
+                fflush(file);
                 }
             }
             // delay to save resources
-            delay(50);
+            delay(100);
         }
     });
 }
@@ -141,16 +134,15 @@ void disabled() {}
 void competition_initialize() {}
 
 void autonomous() {
-    // set position to x:0, y:0, heading:0
+     // set position to x:0, y:0, heading:0
     chassis.setPose(0, 0, 0);
-    // turn to face heading 90 with a very long timeout
-    chassis.moveToPoint(0, 24, 1000000);
+    // move 48" forwards
+    chassis.moveToPoint(0, 24, 10000);
 
 }
 
 void opcontrol() {
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-    
 
 
     pros::Task mechanismTask([]() {
@@ -161,29 +153,9 @@ void opcontrol() {
 
             double liftJogTarget = 0;
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-                liftJogTarget = 7000;
+                liftJogTarget = 11000;
             } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-                liftJogTarget = -10000;
-            }
-
-            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-                puhtongue.move_voltage(12000);
-            } else {
-                puhtongue.brake();
-            }
-
-            // if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-            //     salute.set_value(true);
-            // } else {
-            //     salute.set_value(false);
-            // }
-
-            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-                claw.move_voltage(12000);
-            } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-                claw.move_voltage(-12000);
-            } else {
-                claw.brake();
+                liftJogTarget = -8000;
             }
 
             static bool wasJogging = false;
@@ -201,16 +173,70 @@ void opcontrol() {
             }
             wasJogging = isJogging;
 
+
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+                salute.set_value(true);
+            } else {
+                salute.set_value(false);
+            }
+
+
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+                claw.move_voltage(5500);
+            } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+                claw.move_voltage(-5500);
+            }
+            else {
+                claw.brake();
+                claw.move_voltage(0);
+            }
+
+
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+                toggle.move_voltage(-5500);
+            }
+            else {
+                toggle.brake();
+                toggle.move_voltage(0);
+            }
+
+            // static bool objectWasClose = false;
+            // bool objectIsClose = liftDistance.get_distance() < CLAW_CLOSE_DISTANCE_MM;
+            // if (clawSensorSuppressMs > 0) {
+            //     clawSensorSuppressMs -= 10;
+            // } else if (objectIsClose && !objectWasClose) {
+            //     claw.set_value(false);
+            //     delay(200);
+            //     liftControl(liftStates[1]);
+            // }
+            // objectWasClose = objectIsClose;
+
+
+            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
+                // liftControl(liftStates[0]);
+                delay(100);
+                // liftControl(liftStates[0]);
+            }
+
+            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
+                // liftControl(liftStates[1]);
+            }
+
+            // int liftPosDeg = liftRot.get_position() / 100;
             if (printCounter % 50 == 0) {
-                int liftHottest = (int) std::max(liftMotors.get_temperature(0), liftMotors.get_temperature(1));
-                double driveHottestD = leftMotors.get_temperature(0);
-                driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(1));
-                driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(2));
-                driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(0));
-                driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(1));
-                driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(2));
-                int driveHottest = (int) driveHottestD;
-                controller.print(0, 0, "L:%dC,D:%dC", liftHottest, driveHottest);
+                if (SHOW_LIFT_POS_DEBUG) {
+                    // controller.print(0, 0, "lift pos: %d", liftPosDeg);
+                } else {
+                    int liftHottest = (int) std::max(liftMotors.get_temperature(0), liftMotors.get_temperature(1));
+                    double driveHottestD = leftMotors.get_temperature(0);
+                    driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(1));
+                    driveHottestD = std::max(driveHottestD, leftMotors.get_temperature(2));
+                    driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(0));
+                    driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(1));
+                    driveHottestD = std::max(driveHottestD, rightMotors.get_temperature(2));
+                    int driveHottest = (int) driveHottestD;
+                    controller.print(0, 0, "L:%dC,D:%dC", liftHottest, driveHottest);
+                }
             }
             printCounter++;
 
