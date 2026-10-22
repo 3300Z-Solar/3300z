@@ -46,19 +46,19 @@ lemlib::Drivetrain drivetrain(&leftMotors,
 // lateral motion controller
 lemlib::ControllerSettings linearController(8, 
                                             0, 
-                                            10,
+                                            45,
                                             0, 
                                             0, 
+                                            10000, 
                                             0, 
-                                            0, 
-                                            0, 
+                                            10000, 
                                             0
 );
 
 // angular motion controller
 lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0, // integral gain (kI)
-                                             21, // derivative gain (kD)
+                                             13.875, // derivative gain (kD)
                                              0, // anti windup
                                              0, // small error range, in degrees
                                              0, // small error range timeout, in milliseconds
@@ -115,9 +115,9 @@ void initialize() {
 
         while (true) {
             // print robot location to the brain screen
-            pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
-            pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
-            pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
+            // pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
+            // pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
+            // pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
             // log position JSON to the terminal
             printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
@@ -131,7 +131,7 @@ void initialize() {
                 }
             }
             // delay to save resources
-            delay(100);
+            delay(50);
         }
     });
 }
@@ -144,7 +144,7 @@ void autonomous() {
     // set position to x:0, y:0, heading:0
     chassis.setPose(0, 0, 0);
     // turn to face heading 90 with a very long timeout
-    chassis.turnToHeading(90, 100000);
+    chassis.moveToPoint(0, 24, 1000000);
 
 }
 
