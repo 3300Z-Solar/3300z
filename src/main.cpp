@@ -25,10 +25,10 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 // motor groups
 // pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
 // pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
-pros::MotorGroup rightMotors({7, 9, -8}, pros::MotorGearset::blue);
+pros::MotorGroup rightMotors({7, 10, -8}, pros::MotorGearset::blue);
 pros::MotorGroup leftMotors({-4, 3, -2}, pros::MotorGearset::blue);
-pros::MotorGroup puhTung({-5}, pros::MotorGearset::green);
-pros::MotorGroup claw({20}, pros::MotorGearset::green);
+pros::MotorGroup sidetoggle({-5}, pros::MotorGearset::green);
+pros::MotorGroup claw({-20}, pros::MotorGearset::green);
 pros::MotorGroup toggle({5}, pros::MotorGearset::green);
 
 // claw piston, ADI port H
@@ -175,9 +175,9 @@ void opcontrol() {
 
             double liftJogTarget = 0;
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
-                liftJogTarget = 11000;
+                liftJogTarget = 6000;
             } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-                liftJogTarget = -8000;
+                liftJogTarget = -12000;
             }
 
             static bool wasJogging = false;
@@ -204,9 +204,9 @@ void opcontrol() {
 
 
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-                claw.move_voltage(5500);
+                claw.move_voltage(12000);
             } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-                claw.move_voltage(-5500);
+                claw.move_voltage(-5000);
             }
             else {
                 claw.brake();
@@ -215,7 +215,7 @@ void opcontrol() {
 
 
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-                toggle.move_voltage(-5500);
+                toggle.move_voltage(-12000);
             }
             else {
                 toggle.brake();
