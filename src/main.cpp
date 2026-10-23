@@ -1,9 +1,12 @@
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/chassis/chassis.hpp"
 #include "lemlib/chassis/trackingWheel.hpp"
+#include "liblvgl/llemu.hpp"
 #include "pros/misc.h"
 #include "pros/rotation.hpp"
 #include "macro.hpp"
+#include "pros/rtos.h"
 #include <algorithm>
 #include <cstdio>
 
@@ -14,6 +17,7 @@ using pros::delay;
 // flip to true when liftStates need re-measuring/re-tuning; shows lift
 // position on the controller instead of lift motor temperature
 constexpr bool SHOW_LIFT_POS_DEBUG = false;
+const double DIST_FROM_GOAL = 7.5;
 
 // controller
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
@@ -40,7 +44,7 @@ pros::Distance liftDistance(18); // detects when an object is in the lift
 // tracking wheels
 pros::Rotation horizontalEnc(15);
 pros::Rotation verticalEnc(6);
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 0.38);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::NEW_2, 0);
 lemlib::TrackingWheel vertical(&verticalEnc, lemlib::Omniwheel::NEW_275, 0);
 
 // drivetrain settings
@@ -57,9 +61,9 @@ lemlib::ControllerSettings linearController(8,
                                             0, 
                                             58,
                                             3, 
-                                            0.5, 
+                                            0.001, 
                                             100, 
-                                            1.5, 
+                                            0.001, 
                                             500, 
                                             0 
 );
@@ -69,9 +73,9 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0, // integral gain (kI)
                                              13.875, // derivative gain (kD)
                                              3, // anti windup
-                                             0.5, // small error range, in degrees
+                                             0.001, // small error range, in degrees
                                              100, // small error range timeout, in milliseconds
-                                             1.5, // large error range, in degrees
+                                             0.001, // large error range, in degrees
                                              500, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
@@ -103,28 +107,19 @@ lemlib::Chassis chassis(drivetrain,
 
 void initialize() {
     chassis.calibrate(); // calibrate sensors
-
+    pros::lcd::initialize();
     // thread for position logging
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     // liftControl(liftStates[0]);
 
-    pros::Task loggingTask([]() {
-        const char* logPath = "/usd/pose.json";
-        FILE* file = fopen(logPath, "a");
+    pros::Task loggingTask([&]() {
         while (true) {
-            // log position JSON to the SD card
-            if (pros::usd::is_installed()) {
-                if (file) {
-                printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
-                fprintf(file,
-                    "{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n IM GONNA GOOONNNN,.",
-                    chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis()
-                );
-                fflush(file);
-                }
-            }
-            // delay to save resources
-            delay(100);
+            // pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
+            // pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
+            // pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
+            printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+                   chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta, pros::millis());
+            delay(50);
         }
     });
 }
@@ -132,13 +127,40 @@ void initialize() {
 void disabled() {}
 
 void competition_initialize() {}
+void goalReset(double goalx, double goaly) {
+    double theta = lemlib::degToRad(chassis.getPose().theta);
 
+    double x = goalx - DIST_FROM_GOAL * sin(theta);
+    double y = goaly - DIST_FROM_GOAL * cos(theta);
+
+    chassis.setPose(x, y, chassis.getPose().theta);
+}
 void autonomous() {
-     // set position to x:0, y:0, heading:0
-    chassis.setPose(0, 0, 0);
-    // move 48" forwards
-    chassis.moveToPoint(0, 24, 10000);
+    
+    chassis.setPose(0, 0, 229);
+    chassis.tank(32, 32, true);
+    delay(4000);
+    goalReset(47, 23.5);
+    // chassis.tank(-32, -32, true);
+    chassis.turnToHeading(-45, 4000);
+    // delay(250);
+    chassis.moveToPoint(46, 46, 4000);
+    delay(4000);
+    chassis.turnToPoint(47, 23.5, 4000);
+    chassis.tank(32, 32, true);
+    delay(4000);
+    goalReset(47, 23.5);
 
+    
+
+    // chassis.swingToHeading(-90, lemlib::DriveSide::LEFT, 10000);
+
+    // move 48" forwards
+    // chassis.turnToHeading(90, 1000);
+    // chassis.turnToHeading(180, 1000);
+    // chassis.turnToHeading(270, 1000);
+    // chassis.turnToHeading(360, 1000);
+    // chassis.turnToHeading(360, 3000, {.direction = lemlib::AngularDirection::CCW_COUNTERCLOCKWISE});
 }
 
 void opcontrol() {
