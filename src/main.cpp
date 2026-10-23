@@ -136,20 +136,43 @@ void goalReset(double goalx, double goaly) {
     chassis.setPose(x, y, chassis.getPose().theta);
 }
 void autonomous() {
-    
-    chassis.setPose(0, 0, 229);
+    chassis.setPose(0,   0, 229);
     chassis.tank(32, 32, true);
-    delay(4000);
+    liftMotors.move_voltage(-6000);
+    delay(250);
+    liftMotors.move_voltage(0);
+    delay(750);
     goalReset(47, 23.5);
-    // chassis.tank(-32, -32, true);
-    chassis.turnToHeading(-45, 4000);
+    claw.move_voltage(-12000);
+    // liftMotors.move_voltage(-7000);
+    delay(500);
+    chassis.moveToPoint(60, 45, 1000, {.forwards = false});
+    liftMotors.move_voltage(5000);
+    claw.move_voltage(12000);
+    chassis.turnToPoint(47,47, 1000);
+    liftMotors.move(0);
+    chassis.moveToPoint(47, 47, 1000);
+    liftMotors.move_voltage(-12000);
+    delay(250);
+    liftMotors.move_voltage(0);
+    claw.move(0);
+    chassis.moveToPoint(47, 23.5, 2000);
+    chassis.tank(-128, -128);
+    delay(500);
+    chassis.swingToPoint(23.5, 23.5, lemlib::DriveSide::RIGHT, 1000);
+    chassis.moveToPoint(23.5, 23.5, 1000);
+    chassis.moveToPoint(47, 23.5, 2000);
+
+    // delay(4000);
+    // chassis.turnToPoint(47, 23.5, 4000);
+    // chassis.tank(32, 32, true);
+    // goalReset(47, 23.5);
+    // liftMotors.move_voltage(-7000);
+    // delay(500);
+    // liftMotors.move_voltage(0);
+    // claw.move_voltage(-12000);
     // delay(250);
-    chassis.moveToPoint(46, 46, 4000);
-    delay(4000);
-    chassis.turnToPoint(47, 23.5, 4000);
-    chassis.tank(32, 32, true);
-    delay(4000);
-    goalReset(47, 23.5);
+    // claw.move_voltage(0);
 
     
 
