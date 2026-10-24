@@ -32,7 +32,7 @@ pros::MotorGroup claw({-16}, pros::MotorGearset::green);
 pros::MotorGroup toggle({5}, pros::MotorGearset::green);
 
 // claw piston, ADI port H
-pros::adi::Pneumatics salute('h', false);
+pros::adi::Pneumatics salute('h', true);
 
 pros::Imu imu(14);
 
@@ -106,6 +106,8 @@ lemlib::Chassis chassis(drivetrain,
 );
 
 void initialize() {
+    salute.set_value(true);
+    claw.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     chassis.calibrate(); // calibrate sensors
     pros::lcd::initialize();
     // thread for position logging
@@ -139,7 +141,7 @@ void goalReset(double goalx, double goaly) {
 void autonomous() {
 
     
-    // liftControl(-300, 750);
+    // liftControl(-1200, 750);
     // delay(750);
     // liftControl(-400, 750);
     // delay(750);
@@ -149,40 +151,73 @@ void autonomous() {
     // delay(750);
     // liftControl(-300, 750);
 
-    chassis.setPose(0,   0, 229);
+    chassis.setPose(0, 0, 229);
+    liftSetTarget(-500);
     chassis.tank(32, 32, true);
-    liftControl(-250);
-    delay(1000);
+    delay(700);
     goalReset(47, 23.5);
     //score first pin
-    // liftControl(0, 500);
+    liftControl(-82, 400);
     claw.move_voltage(-12000);
 
-    delay(1500);
-    chassis.moveToPoint(60, 45, 1000, {.forwards = false});
+    delay(800);
+    chassis.moveToPoint(60, 45, 700, {.forwards = false, .maxSpeed = 63});
     // start intaking
     liftSetTarget(0);
     
 
-    chassis.turnToPoint(47,47, 1000);
+    chassis.turnToPoint(47,47, 700, {.maxSpeed = 127});
     chassis.waitUntilDone();
     claw.move_voltage(12000);
-    chassis.moveToPoint(47, 47, 1000);
+    delay(200);
+    chassis.moveToPoint(47, 48, 800);
     // height for second pin
     chassis.waitUntilDone();
-    liftControl(-600, 500);
+    liftControl(-830, 500);
     claw.move(0);
+    
 
     chassis.moveToPoint(47, 23.5, 1000);
     chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    delay(100);
     goalReset(47, 23.5);
+    liftControl(-250, 1000);
+    delay(200);
+    claw.move_voltage(-12000);
+    delay(700);
+    //score second pin
+
     // goalReset(47, 23.5);
     // delay(500);
-    chassis.swingToPoint(23.5, 23.5, lemlib::DriveSide::RIGHT, 1000);
-    chassis.moveToPoint(23.5, 23.5, 1000);
-    chassis.moveToPoint(47, 23.5, 1000);
-    chassis.waitUntilDone();
-    goalReset(47, 23.5);
+    chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
+    claw.move_voltage(0);
+    liftControl(0, 700);
+    // back up
+    // claw.move_voltage(12000);
+    // chassis.turnToPoint(23.5, 23.5, 900);
+    // chassis.moveToPoint(23.5, 24.2, 800, {.maxSpeed = 63});
+    // chassis.waitUntilDone();
+    // liftControl(-950, 1000);
+    // claw.move_voltage(0);
+    // //pick up 3rd pin
+    // chassis.moveToPoint(47, 23.5, 1500, {.maxSpeed = 127});
+    // chassis.waitUntilDone();
+    // chassis.tank(-32, -32, true);
+    // delay(500);
+    // goalReset(47, 23.5);
+    // liftControl(-400, 1000);
+    // claw.move_voltage(-12000);
+    // delay(600);
+    // // chassis.moveToPoint(44, 34, 200, {.forwards = false});
+    // claw.move_voltage(0);
+    //score 3rd
+    chassis.moveToPoint(29.5, 0, 300, {.forwards = false});
+    salute.set_value(false);
+    chassis.moveToPoint(76, 5, 2000, {.forwards = false});
+    delay(1700);
+    salute.set_value(true);
+    chassis.moveToPoint(40, 0, 800);
 
 
 

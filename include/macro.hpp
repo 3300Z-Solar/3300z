@@ -15,9 +15,9 @@ inline int liftStates[6] = {0, -200, 160, 143, 125, 206};
 // [1] = slightly above ground, after picking up an object
 
 // lemlib PID driving the lift - output is millivolts, clamped to +/-12000
-inline lemlib::PID liftPid(500, // kP
+inline lemlib::PID liftPid(15, // kP
                            0, // kI
-                           1000, // kD
+                           100, // kD
                            0, // integral anti windup range (deg)
                            false); // reset integral when sign of error flips
 
