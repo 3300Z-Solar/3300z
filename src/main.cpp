@@ -28,7 +28,7 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup rightMotors({7, 10, -8}, pros::MotorGearset::blue);
 pros::MotorGroup leftMotors({-4, 3, -2}, pros::MotorGearset::blue);
 pros::MotorGroup sidetoggle({-5}, pros::MotorGearset::green);
-pros::MotorGroup claw({-20}, pros::MotorGearset::green);
+pros::MotorGroup claw({-16}, pros::MotorGearset::green);
 pros::MotorGroup toggle({5}, pros::MotorGearset::green);
 
 // claw piston, ADI port H
@@ -110,6 +110,7 @@ void initialize() {
     pros::lcd::initialize();
     // thread for position logging
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    pros::Task liftTask{liftTaskFn}; // lemlib PID loop for the lift
     // liftControl(liftStates[0]);
 
     pros::Task loggingTask([&]() {
@@ -136,32 +137,54 @@ void goalReset(double goalx, double goaly) {
     chassis.setPose(x, y, chassis.getPose().theta);
 }
 void autonomous() {
+
+    
+    // liftControl(-300, 750);
+    // delay(750);
+    // liftControl(-400, 750);
+    // delay(750);
+    // liftControl(-500, 750);
+    // delay(750);
+    // liftControl(-600, 750);
+    // delay(750);
+    // liftControl(-300, 750);
+
     chassis.setPose(0,   0, 229);
     chassis.tank(32, 32, true);
-    liftMotors.move_voltage(-6000);
-    delay(250);
-    liftMotors.move_voltage(0);
-    delay(750);
+    liftControl(-250);
+    delay(1000);
     goalReset(47, 23.5);
+    //score first pin
+    // liftControl(0, 500);
     claw.move_voltage(-12000);
-    // liftMotors.move_voltage(-7000);
-    delay(500);
+
+    delay(1500);
     chassis.moveToPoint(60, 45, 1000, {.forwards = false});
-    liftMotors.move_voltage(5000);
-    claw.move_voltage(12000);
+    // start intaking
+    liftSetTarget(0);
+    
+
     chassis.turnToPoint(47,47, 1000);
-    liftMotors.move(0);
+    chassis.waitUntilDone();
+    claw.move_voltage(12000);
     chassis.moveToPoint(47, 47, 1000);
-    liftMotors.move_voltage(-12000);
-    delay(250);
-    liftMotors.move_voltage(0);
+    // height for second pin
+    chassis.waitUntilDone();
+    liftControl(-600, 500);
     claw.move(0);
-    chassis.moveToPoint(47, 23.5, 2000);
-    chassis.tank(-128, -128);
-    delay(500);
+
+    chassis.moveToPoint(47, 23.5, 1000);
+    chassis.waitUntilDone();
+    goalReset(47, 23.5);
+    // goalReset(47, 23.5);
+    // delay(500);
     chassis.swingToPoint(23.5, 23.5, lemlib::DriveSide::RIGHT, 1000);
     chassis.moveToPoint(23.5, 23.5, 1000);
-    chassis.moveToPoint(47, 23.5, 2000);
+    chassis.moveToPoint(47, 23.5, 1000);
+    chassis.waitUntilDone();
+    goalReset(47, 23.5);
+
+
 
     // delay(4000);
     // chassis.turnToPoint(47, 23.5, 4000);
@@ -184,10 +207,12 @@ void autonomous() {
     // chassis.turnToHeading(270, 1000);
     // chassis.turnToHeading(360, 1000);
     // chassis.turnToHeading(360, 3000, {.direction = lemlib::AngularDirection::CCW_COUNTERCLOCKWISE});
+    
 }
 
 void opcontrol() {
     liftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+    liftManual(); // release any PID hold left over from autonomous
 
 
     pros::Task mechanismTask([]() {
@@ -267,10 +292,10 @@ void opcontrol() {
                 // liftControl(liftStates[1]);
             }
 
-            // int liftPosDeg = liftRot.get_position() / 100;
+            int liftPosDeg = (int) liftGetPosition();
             if (printCounter % 50 == 0) {
                 if (SHOW_LIFT_POS_DEBUG) {
-                    // controller.print(0, 0, "lift pos: %d", liftPosDeg);
+                    controller.print(0, 0, "lift pos: %d", liftPosDeg);
                 } else {
                     int liftHottest = (int) std::max(liftMotors.get_temperature(0), liftMotors.get_temperature(1));
                     double driveHottestD = leftMotors.get_temperature(0);
