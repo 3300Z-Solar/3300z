@@ -28,7 +28,7 @@ pros::Controller controller(pros::E_CONTROLLER_MASTER);
 pros::MotorGroup rightMotors({7, 10, -8}, pros::MotorGearset::blue);
 pros::MotorGroup leftMotors({-4, 3, -2}, pros::MotorGearset::blue);
 pros::MotorGroup sidetoggle({-5}, pros::MotorGearset::green);
-pros::MotorGroup claw({-20}, pros::MotorGearset::green);
+pros::MotorGroup claw({-16}, pros::MotorGearset::green);
 pros::MotorGroup toggle({5}, pros::MotorGearset::green);
 
 // claw piston, ADI port H
@@ -170,7 +170,8 @@ void opcontrol() {
     pros::Task mechanismTask([]() {
         int printCounter = 0;
         double liftJogVoltage = 0;
-        const double liftJogSlewRate = 170;
+        const double liftJogSlewRate = 500;
+        const double liftJogKickVoltage = 5000; // initial jump so the lift doesn't crawl before ramping up
         while (true) {
 
             double liftJogTarget = 0;
@@ -183,6 +184,9 @@ void opcontrol() {
             static bool wasJogging = false;
             bool isJogging = (liftJogTarget != 0);
             if (isJogging) {
+                if (!wasJogging) {
+                    liftJogVoltage = std::clamp(liftJogTarget, -liftJogKickVoltage, liftJogKickVoltage);
+                }
                 if (liftJogVoltage < liftJogTarget) {
                     liftJogVoltage = std::min(liftJogVoltage + liftJogSlewRate, liftJogTarget);
                 } else if (liftJogVoltage > liftJogTarget) {
@@ -197,9 +201,9 @@ void opcontrol() {
 
 
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-                salute.set_value(true);
-            } else {
                 salute.set_value(false);
+            } else {
+                salute.set_value(true);
             }
 
 
@@ -270,7 +274,7 @@ void opcontrol() {
     while (true) {
         int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-        chassis.arcade(leftY, rightX);
+        chassis.arcade(-leftY, rightX);
         delay(10);
     }
 }
