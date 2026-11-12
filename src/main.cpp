@@ -4,6 +4,7 @@
 #include "lemlib/chassis/trackingWheel.hpp"
 #include "liblvgl/llemu.hpp"
 #include "pros/misc.h"
+#include "pros/motors.h"
 #include "pros/rotation.hpp"
 #include "macro.hpp"
 #include "pros/rtos.h"
@@ -152,23 +153,49 @@ void autonomous() {
     // // delay(750);
     // // liftControl(-300, 750);
 
-    // chassis.setPose(0, 0, 229);
-    // liftSetTarget(-500);
-    // chassis.tank(32, 32, true);
-    // delay(700);
-    // goalReset(47, 23.5);
-    // //score first pin
-    // liftControl(-82, 400);
-    // claw.move_voltage(-12000);
+    chassis.setPose(0, 0, 229);
+    liftSetTarget(-500);
+    chassis.tank(32, 32, true);
+    delay(700);
+    goalReset(47, 23.5);
+    //score first pin
+    liftControl(-82, 400);
+    claw.move_voltage(-12000);
 
-    // delay(800);
-    // chassis.moveToPoint(60, 45, 700, {.forwards = false, .maxSpeed = 63});
-    // // start intaking
-    // liftSetTarget(0);
+    delay(800);
+    chassis.moveToPoint(60, 45, 700, {.forwards = false, .maxSpeed = 63});
+    // start intaking
+    liftSetTarget(0);
     
 
-    // chassis.turnToPoint(47,47, 700, {.maxSpeed = 127});
-    // chassis.waitUntilDone();
+    chassis.turnToPoint(47,47, 700, {.maxSpeed = 127});
+    chassis.waitUntilDone();
+    claw.move_voltage(12000);
+    delay(200);
+    chassis.moveToPoint(47, 48, 800);
+    // height for second pin
+    chassis.waitUntilDone();
+    liftControl(-830, 500);
+    claw.move(0);
+    
+
+    chassis.moveToPoint(47, 23.5, 1000);
+    chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    delay(100);
+    goalReset(47, 23.5);
+    liftControl(-250, 1000);
+    delay(200);
+    claw.move_voltage(-12000);
+    delay(700);
+    //score second pin
+
+    // goalReset(47, 23.5);
+    // delay(500);
+    chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
+    claw.move_voltage(0);
+    liftControl(0, 700);
+    // back up
     // claw.move_voltage(12000);
     // delay(200);
     // chassis.moveToPoint(47, 48, 800);
@@ -193,26 +220,7 @@ void autonomous() {
     // // delay(500);
     // chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
     // claw.move_voltage(0);
-    // liftControl(0, 700);
-    // // back up
-    // // claw.move_voltage(12000);
-    // // chassis.turnToPoint(23.5, 23.5, 900);
-    // // chassis.moveToPoint(23.5, 24.2, 800, {.maxSpeed = 63});
-    // // chassis.waitUntilDone();
-    // // liftControl(-950, 1000);
-    // // claw.move_voltage(0);
-    // // //pick up 3rd pin
-    // // chassis.moveToPoint(47, 23.5, 1500, {.maxSpeed = 127});
-    // // chassis.waitUntilDone();
-    // // chassis.tank(-32, -32, true);
-    // // delay(500);
-    // // goalReset(47, 23.5);
-    // // liftControl(-400, 1000);
-    // // claw.move_voltage(-12000);
-    // // delay(600);
-    // // // chassis.moveToPoint(44, 34, 200, {.forwards = false});
-    // // claw.move_voltage(0);
-    // //score 3rd
+    //score 3rd
     // chassis.moveToPoint(29.5, 0, 300, {.forwards = false});
     // salute.set_value(false);
     // chassis.moveToPoint(76, 5, 2000, {.forwards = false});
@@ -284,7 +292,7 @@ void opcontrol() {
             wasJogging = isJogging;
 
 
-            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
+if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
                 rsalute.set_value(true);
             } else {
                 rsalute.set_value(false);
