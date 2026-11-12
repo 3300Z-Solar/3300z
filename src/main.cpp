@@ -23,21 +23,21 @@ const double DIST_FROM_GOAL = 7.5;
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 // motor groups
-// pros::MotorGroup rightMotors({5, 3, -1}, pros::MotorGearset::blue);
-// pros::MotorGroup leftMotors({-6, -7, 8}, pros::MotorGearset::blue);
+//pros::MotorGroup rightMotors({4, -3, 2}, pros::MotorGearset::blue);
+//sean
 pros::MotorGroup rightMotors({7, 10, -8}, pros::MotorGearset::blue);
+//pros::MotorGroup leftMotors({-7, -10, 8}, pros::MotorGearset::blue);
+//sean 
 pros::MotorGroup leftMotors({-4, 3, -2}, pros::MotorGearset::blue);
 pros::MotorGroup sidetoggle({-5}, pros::MotorGearset::green);
 pros::MotorGroup claw({-16}, pros::MotorGearset::green);
-pros::MotorGroup toggle({5}, pros::MotorGearset::green);
+pros::MotorGroup btoggle({13}, pros::MotorGearset::green);
 
 // claw piston, ADI port H
-pros::adi::Pneumatics salute('h', true);
+pros::adi::Pneumatics rsalute('g', true);
+pros::adi::Pneumatics lsalute('h', true);
 
 pros::Imu imu(14);
-
-pros::Distance liftDistance(18); // detects when an object is in the lift
-//int CLAW_CLOSE_DISTANCE_MM = 30; // TODO: tune this - claw auto-closes when an object is closer than this
 
 
 
@@ -106,7 +106,8 @@ lemlib::Chassis chassis(drivetrain,
 );
 
 void initialize() {
-    salute.set_value(true);
+    rsalute.set_value(false);
+    lsalute.set_value(true);
     claw.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     chassis.calibrate(); // calibrate sensors
     pros::lcd::initialize();
@@ -141,83 +142,83 @@ void goalReset(double goalx, double goaly) {
 void autonomous() {
 
     
-    // liftControl(-1200, 750);
-    // delay(750);
-    // liftControl(-400, 750);
-    // delay(750);
-    // liftControl(-500, 750);
-    // delay(750);
-    // liftControl(-600, 750);
-    // delay(750);
-    // liftControl(-300, 750);
+    // // liftControl(-1200, 750);
+    // // delay(750);
+    // // liftControl(-400, 750);
+    // // delay(750);
+    // // liftControl(-500, 750);
+    // // delay(750);
+    // // liftControl(-600, 750);
+    // // delay(750);
+    // // liftControl(-300, 750);
 
-    chassis.setPose(0, 0, 229);
-    liftSetTarget(-500);
-    chassis.tank(32, 32, true);
-    delay(700);
-    goalReset(47, 23.5);
-    //score first pin
-    liftControl(-82, 400);
-    claw.move_voltage(-12000);
-
-    delay(800);
-    chassis.moveToPoint(60, 45, 700, {.forwards = false, .maxSpeed = 63});
-    // start intaking
-    liftSetTarget(0);
-    
-
-    chassis.turnToPoint(47,47, 700, {.maxSpeed = 127});
-    chassis.waitUntilDone();
-    claw.move_voltage(12000);
-    delay(200);
-    chassis.moveToPoint(47, 48, 800);
-    // height for second pin
-    chassis.waitUntilDone();
-    liftControl(-830, 500);
-    claw.move(0);
-    
-
-    chassis.moveToPoint(47, 23.5, 1000);
-    chassis.waitUntilDone();
-    chassis.tank(32, 32, true);
-    delay(100);
-    goalReset(47, 23.5);
-    liftControl(-250, 1000);
-    delay(200);
-    claw.move_voltage(-12000);
-    delay(700);
-    //score second pin
-
+    // chassis.setPose(0, 0, 229);
+    // liftSetTarget(-500);
+    // chassis.tank(32, 32, true);
+    // delay(700);
     // goalReset(47, 23.5);
-    // delay(500);
-    chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
-    claw.move_voltage(0);
-    liftControl(0, 700);
-    // back up
-    // claw.move_voltage(12000);
-    // chassis.turnToPoint(23.5, 23.5, 900);
-    // chassis.moveToPoint(23.5, 24.2, 800, {.maxSpeed = 63});
-    // chassis.waitUntilDone();
-    // liftControl(-950, 1000);
-    // claw.move_voltage(0);
-    // //pick up 3rd pin
-    // chassis.moveToPoint(47, 23.5, 1500, {.maxSpeed = 127});
-    // chassis.waitUntilDone();
-    // chassis.tank(-32, -32, true);
-    // delay(500);
-    // goalReset(47, 23.5);
-    // liftControl(-400, 1000);
+    // //score first pin
+    // liftControl(-82, 400);
     // claw.move_voltage(-12000);
-    // delay(600);
-    // // chassis.moveToPoint(44, 34, 200, {.forwards = false});
+
+    // delay(800);
+    // chassis.moveToPoint(60, 45, 700, {.forwards = false, .maxSpeed = 63});
+    // // start intaking
+    // liftSetTarget(0);
+    
+
+    // chassis.turnToPoint(47,47, 700, {.maxSpeed = 127});
+    // chassis.waitUntilDone();
+    // claw.move_voltage(12000);
+    // delay(200);
+    // chassis.moveToPoint(47, 48, 800);
+    // // height for second pin
+    // chassis.waitUntilDone();
+    // liftControl(-830, 500);
+    // claw.move(0);
+    
+
+    // chassis.moveToPoint(47, 23.5, 1000);
+    // chassis.waitUntilDone();
+    // chassis.tank(32, 32, true);
+    // delay(100);
+    // goalReset(47, 23.5);
+    // liftControl(-250, 1000);
+    // delay(200);
+    // claw.move_voltage(-12000);
+    // delay(700);
+    // //score second pin
+
+    // // goalReset(47, 23.5);
+    // // delay(500);
+    // chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
     // claw.move_voltage(0);
-    //score 3rd
-    chassis.moveToPoint(29.5, 0, 300, {.forwards = false});
-    salute.set_value(false);
-    chassis.moveToPoint(76, 5, 2000, {.forwards = false});
-    delay(1700);
-    salute.set_value(true);
-    chassis.moveToPoint(40, 0, 800);
+    // liftControl(0, 700);
+    // // back up
+    // // claw.move_voltage(12000);
+    // // chassis.turnToPoint(23.5, 23.5, 900);
+    // // chassis.moveToPoint(23.5, 24.2, 800, {.maxSpeed = 63});
+    // // chassis.waitUntilDone();
+    // // liftControl(-950, 1000);
+    // // claw.move_voltage(0);
+    // // //pick up 3rd pin
+    // // chassis.moveToPoint(47, 23.5, 1500, {.maxSpeed = 127});
+    // // chassis.waitUntilDone();
+    // // chassis.tank(-32, -32, true);
+    // // delay(500);
+    // // goalReset(47, 23.5);
+    // // liftControl(-400, 1000);
+    // // claw.move_voltage(-12000);
+    // // delay(600);
+    // // // chassis.moveToPoint(44, 34, 200, {.forwards = false});
+    // // claw.move_voltage(0);
+    // //score 3rd
+    // chassis.moveToPoint(29.5, 0, 300, {.forwards = false});
+    // salute.set_value(false);
+    // chassis.moveToPoint(76, 5, 2000, {.forwards = false});
+    // delay(1700);
+    // salute.set_value(true);
+    // chassis.moveToPoint(40, 0, 800);
 
 
 
@@ -284,11 +285,23 @@ void opcontrol() {
 
 
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-                salute.set_value(false);
+                rsalute.set_value(true);
             } else {
-                salute.set_value(true);
+                rsalute.set_value(false);
             }
 
+         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+                lsalute.set_value(false);
+            } else {
+                lsalute.set_value(true);
+            }
+
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+                btoggle.move_voltage(-12000);
+            } else {
+                btoggle.brake();
+                btoggle.move_voltage(0);
+            }
 
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
                 claw.move_voltage(12000);
@@ -298,37 +311,6 @@ void opcontrol() {
             else {
                 claw.brake();
                 claw.move_voltage(0);
-            }
-
-
-            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
-                toggle.move_voltage(-12000);
-            }
-            else {
-                toggle.brake();
-                toggle.move_voltage(0);
-            }
-
-            // static bool objectWasClose = false;
-            // bool objectIsClose = liftDistance.get_distance() < CLAW_CLOSE_DISTANCE_MM;
-            // if (clawSensorSuppressMs > 0) {
-            //     clawSensorSuppressMs -= 10;
-            // } else if (objectIsClose && !objectWasClose) {
-            //     claw.set_value(false);
-            //     delay(200);
-            //     liftControl(liftStates[1]);
-            // }
-            // objectWasClose = objectIsClose;
-
-
-            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2)) {
-                // liftControl(liftStates[0]);
-                delay(100);
-                // liftControl(liftStates[0]);
-            }
-
-            if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-                // liftControl(liftStates[1]);
             }
 
             int liftPosDeg = (int) liftGetPosition();
