@@ -67,7 +67,9 @@ inline bool liftControl(double target, int timeoutMs = LIFT_DEFAULT_TIMEOUT) {
 
 // runs on its own pros::Task, updates the PID every 10ms
 inline void liftTaskFn() {
+    liftMotors.move(64);
     liftMotors.tare_position_all();
+    liftMotors.move(0);
     while (true) {
         if (liftHolding) {
             double error = liftTarget - liftGetPosition();

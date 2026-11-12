@@ -4,6 +4,7 @@
 #include "lemlib/chassis/trackingWheel.hpp"
 #include "liblvgl/llemu.hpp"
 #include "pros/misc.h"
+#include "pros/motors.h"
 #include "pros/rotation.hpp"
 #include "macro.hpp"
 #include "pros/rtos.h"
@@ -32,7 +33,8 @@ pros::MotorGroup claw({-16}, pros::MotorGearset::green);
 pros::MotorGroup toggle({5}, pros::MotorGearset::green);
 
 // claw piston, ADI port H
-pros::adi::Pneumatics salute('h', true);
+pros::adi::Pneumatics rightsalute('g', false);
+pros::adi::Pneumatics leftsalute('h', true);
 
 pros::Imu imu(14);
 
@@ -106,7 +108,8 @@ lemlib::Chassis chassis(drivetrain,
 );
 
 void initialize() {
-    salute.set_value(true);
+    rightsalute.set_value(true);
+    leftsalute.set_value(true);
     claw.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     chassis.calibrate(); // calibrate sensors
     pros::lcd::initialize();
@@ -166,11 +169,11 @@ void autonomous() {
     liftSetTarget(0);
     
 
-    chassis.turnToPoint(47,47, 700, {.maxSpeed = 127});
+    chassis.turnToPoint(44,47, 700, {.maxSpeed = 127});
     chassis.waitUntilDone();
     claw.move_voltage(12000);
     delay(200);
-    chassis.moveToPoint(47, 48, 800);
+    chassis.moveToPoint(44, 48, 800);
     // height for second pin
     chassis.waitUntilDone();
     liftControl(-830, 500);
@@ -188,11 +191,51 @@ void autonomous() {
     delay(700);
     //score second pin
 
+    // // goalReset(47, 23.5);
+    // // delay(500);
+    // chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
+    // claw.move_voltage(0);
+    // liftControl(0, 700);
+
+
+
+
+
+
+
+    // chassis.turnToPoint(24.5,24.5, 700, {.maxSpeed = 127});
+    // chassis.waitUntilDone();
+    // claw.move_voltage(12000);
+    // delay(200);
+    // chassis.moveToPoint(24.5, 24.5, 800);
+    // // height for second pin
+    // chassis.waitUntilDone();
+    // liftControl(-1000, 500);
+    // claw.move(0);
+    
+
+    // chassis.moveToPoint(47, 26, 1000);
+    // chassis.waitUntilDone();
+    // chassis.tank(32, 32, true);
+    // delay(100);
     // goalReset(47, 23.5);
-    // delay(500);
-    chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
-    claw.move_voltage(0);
-    liftControl(0, 700);
+    // liftControl(-250, 1000);
+    // delay(200);
+    // claw.move_voltage(-12000);
+    // delay(700);
+    // //score second pin
+
+    // // goalReset(47, 23.5);
+    // // delay(500);
+    // chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
+    // claw.move_voltage(0);
+    // liftControl(0, 700);
+
+
+
+
+
+
     // back up
     // claw.move_voltage(12000);
     // chassis.turnToPoint(23.5, 23.5, 900);
@@ -212,12 +255,17 @@ void autonomous() {
     // // chassis.moveToPoint(44, 34, 200, {.forwards = false});
     // claw.move_voltage(0);
     //score 3rd
-    chassis.moveToPoint(29.5, 0, 300, {.forwards = false});
-    salute.set_value(false);
-    chassis.moveToPoint(76, 5, 2000, {.forwards = false});
-    delay(1700);
-    salute.set_value(true);
-    chassis.moveToPoint(40, 0, 800);
+
+
+    // //here on is toggle
+    // rightsalute.set_value(false);
+    // chassis.moveToPoint(76, 0, 2000, {.maxSpeed = 127});
+    // // delay(1700);
+    // chassis.waitUntilDone();
+    // rightsalute.set_value(true);
+    // delay(500);
+    // chassis.moveToPoint(40, -5, 800, {.forwards = false});
+    // // chassis.moveToPoint(0, 0, 5000, {.maxSpeed = 127});
 
 
 
@@ -280,9 +328,14 @@ void opcontrol() {
 
 
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
-                salute.set_value(true);
+                rightsalute.set_value(false);
             } else {
-                salute.set_value(false);
+                rightsalute.set_value(true);
+            }
+            if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
+                leftsalute.set_value(false);
+            } else {
+                leftsalute.set_value(true);
             }
 
 
