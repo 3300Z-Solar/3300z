@@ -1,102 +1,124 @@
 /*
-Autos:
+--------------------------------Autos----------------------------
 
-Prayers:
-chassis.moveToPoint(0, 0,10);
-delay(10);
-// toggle
-salute.set_value(true);
-delay(200);
-chassis.moveToPoint(-2, -8, 750, {.forwards = false});
-delay(360);
-salute.set_value(false);
-chassis.turnToHeading(-50, 360);
-delay(120);
-liftControl(liftStates[1]);
-// first pin
-chassis.moveToPoint(-1.2, 9.4, 820, {.maxSpeed = 127});
-delay(200);
-liftControl(liftStates[0]);
-claw.set_value(true);
-// // back up
-chassis.moveToPoint(5, -4 ,300, {.forwards = false, .maxSpeed = 127});
-// second pin
-chassis.moveToPose(31.6, 25, 46, 1800, {.maxSpeed = 127});
-delay(1573);
-claw.set_value(false);
-delay(100);
-liftControl(liftStates[2]);
-chassis.turnToHeading(140, 300);
-// third pin
-chassis.moveToPose(46.6, -24, 159, 1300, {.maxSpeed = 120});
-delay(1600);
-liftControl(liftStates[1]);
-delay(300);
-claw.set_value(true);
-delay(850);
-chassis.moveToPoint(28.45, 35.2, 80, {.forwards  = false});
-// back up
-chassis.moveToPose(26.6, 18.3, 45, 800, {.forwards = false});
-// fourth pin
-liftControl(liftStates[0]);
-chassis.moveToPose(7.7, 33.7, -50, 1500, {.maxSpeed = 115});
-delay(1720);
-claw.set_value(false);
-delay(100);
-liftControl(liftStates[3]);
-chassis.moveToPoint(0, 4, 1500, {.maxSpeed = 127});
-delay(1300);
-liftControl(liftStates[4]);
-delay(300);
-claw.set_value(true);
-chassis.moveToPoint(8.7, 30, 1000, {.forwards = false});
 
-Close Side:
-chassis.moveToPoint(0, 0,10);
-delay(10);
-liftControl(liftStates[1]);
-// toggle
-chassis.moveToPoint(0, 6,2000, {.maxSpeed = 80});
-delay(900);
-liftControl(liftStates[0]);
+-------Close Side-------
 
-Programming Skills
+    
+    // // liftControl(-1200, 750);
+    // // delay(750);
+    // // liftControl(-400, 750);
+    // // delay(750);
+    // // liftControl(-500, 750);
+    // // delay(750);
+    // // liftControl(-600, 750);
+    // // delay(750);
+    // // liftControl(-300, 750);
 
-right side:
-chassis.moveToPoint(0, 0, 0);
-delay(10);
-// toggle
-salute.set_value(true);
-delay(200);
-chassis.moveToPoint(-1, -9, 750, {.forwards = false});
-delay(360);
-salute.set_value(false);
-chassis.turnToHeading(-50, 360);
-delay(120);
-liftControl(liftStates[1]);
-// first pin
-chassis.moveToPoint(-1.2, 9.4, 820, {.maxSpeed = 127});
-delay(200);
-liftControl(liftStates[0]);
-claw.set_value(true);
-delay(100);
-liftControl(liftStates[1]);
-// // back up
-chassis.moveToPoint(9, 3 ,800, {.forwards = false, .maxSpeed = 127});
-// second pin
-chassis.moveToPoint(-8, 5, 800, {.maxSpeed = 80});
-liftControl(liftStates[0]);
-chassis.moveToPoint(-10, 15, 1700, {.maxSpeed = 60});
-chassis.moveToPoint(-16.9, 22.2, 2000, {.maxSpeed = 80});
-delay(800);
-claw.set_value(false);
-delay(500);
-liftControl(liftStates[2]);
-chassis.moveToPoint(-1.2, 9.4, 1000, {.maxSpeed = 97});
-delay(600);
-liftControl(liftStates[1]);
-claw.set_value(true);
-﻿
+    chassis.setPose(0, 0, 229);
+    liftSetTarget(-500);
+    chassis.tank(32, 32, true);
+    delay(700);
+    goalReset(47, 23.5);
+    //score first pin
+    liftControl(-82, 400);
+    claw.move_voltage(-12000);
+
+    delay(800);
+    chassis.moveToPoint(60, 45, 700, {.forwards = false, .maxSpeed = 63});
+    // start intaking
+    liftSetTarget(0);
+    
+
+    chassis.turnToPoint(47,47, 700, {.maxSpeed = 127});
+    chassis.waitUntilDone();
+    claw.move_voltage(12000);
+    delay(200);
+    chassis.moveToPoint(47, 48, 800);
+    // height for second pin
+    chassis.waitUntilDone();
+    liftControl(-830, 500);
+    claw.move(0);
+    
+
+    chassis.moveToPoint(47, 23.5, 1000);
+    chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    delay(100);
+    goalReset(47, 23.5);
+    liftControl(-250, 1000);
+    delay(200);
+    claw.move_voltage(-12000);
+    delay(700);
+    //score second pin
+
+    // goalReset(47, 23.5);
+    // delay(500);
+    chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
+    claw.move_voltage(0);
+    liftControl(0, 700);
+    // back up
+    // claw.move_voltage(12000);
+    // delay(200);
+    // chassis.moveToPoint(47, 48, 800);
+    // // height for second pin
+    // chassis.waitUntilDone();
+    // liftControl(-830, 500);
+    // claw.move(0);
+    
+
+    // chassis.moveToPoint(47, 23.5, 1000);
+    // chassis.waitUntilDone();
+    // chassis.tank(32, 32, true);
+    // delay(100);
+    // goalReset(47, 23.5);
+    // liftControl(-250, 1000);
+    // delay(200);
+    // claw.move_voltage(-12000);
+    // delay(700);
+    // //score second pin
+
+    // // goalReset(47, 23.5);
+    // // delay(500);
+    // chassis.moveToPoint(37, 8.5, 1000, {.forwards = false});
+    // claw.move_voltage(0);
+    //score 3rd
+    // chassis.moveToPoint(29.5, 0, 300, {.forwards = false});
+    // salute.set_value(false);
+    // chassis.moveToPoint(76, 5, 2000, {.forwards = false});
+    // delay(1700);
+    // salute.set_value(true);
+    // chassis.moveToPoint(40, 0, 800);
+
+
+
+    // delay(4000);
+    // chassis.turnToPoint(47, 23.5, 4000);
+    // chassis.tank(32, 32, true);
+    // goalReset(47, 23.5);
+    // liftMotors.move_voltage(-7000);
+    // delay(500);
+    // liftMotors.move_voltage(0);
+    // claw.move_voltage(-12000);
+    // delay(250);
+    // claw.move_voltage(0);
+
+    
+
+    // chassis.swingToHeading(-90, lemlib::DriveSide::LEFT, 10000);
+
+    // move 48" forwards
+    // chassis.turnToHeading(90, 1000);
+    // chassis.turnToHeading(180, 1000);
+    // chassis.turnToHeading(270, 1000);
+    // chassis.turnToHeading(360, 1000);
+    // chassis.turnToHeading(360, 3000, {.direction = lemlib::AngularDirection::CCW_COUNTERCLOCKWISE});
+
+---------Programming Skills--------
+
+
+---------right side-----------
+
 
 
 */
