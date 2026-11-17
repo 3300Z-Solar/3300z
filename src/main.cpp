@@ -133,6 +133,7 @@ void disabled() {}
 
 void competition_initialize() {}
 void goalReset(double goalx, double goaly) {
+    chassis.waitUntilDone();
     double theta = lemlib::degToRad(chassis.getPose().theta);
 
     double x = goalx - DIST_FROM_GOAL * sin(theta);
@@ -184,17 +185,75 @@ void josh_far() {
 }
 
 void autonomous() {
-chassis.setPose(-69.42, -0, 0);
-chassis.tank(32, 32, true);
-goalReset(-69.42, -0);
-chassis.moveToPoint(-47.09, -23.79, 5000);
-chassis.moveToPoint(-47.94, -6.8, 5000);
-chassis.moveToPoint(-23.79, -23.3, 5000);
-chassis.moveToPoint(-47.21, -24.15, 5000);
-chassis.moveToPoint(-28.4, -28.04, 5000);
-chassis.moveToPoint(-47.21, -46.85, 5000);
-chassis.moveToPoint(-47.09, -23.91, 5000);
 
+    // flip toggle and release banding
+    chassis.setPose(-67, 0, 90);
+    claw.move_voltage(12000);
+    delay(70);
+    claw.brake();
+    btoggle.move_voltage(-12000);
+    delay(400);
+    btoggle.brake();
+    claw.move_voltage(12000);
+
+    // move to goal and score pin 1
+    liftSetTarget(-650);
+    chassis.moveToPoint(-60, -19, 1200);
+    chassis.waitUntilDone();
+    goalReset(-47, -23.5);
+    liftSetTarget(-200);
+    delay(400);
+    claw.move_voltage(-12000);
+    delay(350);
+    claw.brake();
+
+    // back out of goal and grab 2
+    chassis.moveToPoint(-32, 4, 900, {.forwards = false});
+    chassis.waitUntilDone();
+    chassis.turnToPoint(-24.5, -22, 700);
+    chassis.moveToPoint(-24.5, -22, 1500, {.maxSpeed = 90});
+    liftSetTarget(-100);
+    claw.move_voltage(-12000);
+    delay(500);
+    claw.brake();
+    delay(210);
+    claw.move_voltage(12000);
+    delay(350);
+
+    // move to goal and score pin 2
+    liftSetTarget(-850);
+    chassis.moveToPoint(-47, -23.5, 1200, {.maxSpeed = 127});
+    chassis.waitUntilDone();
+    goalReset(-47, -23.5);
+    claw.move_voltage(12000);
+    liftSetTarget(-125);
+    delay(200);
+    claw.move_voltage(-12000);
+    delay(350);
+    claw.brake();
+
+    // back out of goal and grab 3
+    chassis.moveToPoint(-29, -29.0, 1000, {.forwards = false});
+    liftSetTarget(0);
+    chassis.turnToPoint(-44.5, -43.5, 200);
+    chassis.moveToPoint(-44.5, -43.5, 700);
+    claw.move_voltage(-12000);
+    claw.brake();
+    delay(510);
+    claw.move_voltage(12000);
+    delay(100);
+    
+
+    // move to goal and score pin 3
+    liftSetTarget(-1100);
+    delay(200);
+    chassis.turnToPoint(-47, -23.5, 700);
+    chassis.moveToPoint(-47, -23.5, 1000);
+    chassis.waitUntilDone();
+    goalReset(-47, -23.5);
+    liftSetTarget(-250);
+    delay(200);
+    claw.move_voltage(-12000);
 }
 
 void opcontrol() {
@@ -257,7 +316,7 @@ if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)) {
             if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
                 claw.move_voltage(12000);
             } else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-                claw.move_voltage(-5000);
+                claw.move_voltage(-10000);
             }
             else {
                 claw.brake();
