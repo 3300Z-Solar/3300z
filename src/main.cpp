@@ -140,6 +140,49 @@ void goalReset(double goalx, double goaly) {
 
     chassis.setPose(x, y, chassis.getPose().theta);
 }
+
+void josh_far() {
+
+    chassis.setPose(-34, -60, 41);
+    claw.move_voltage(12000); delay(100); claw.move_voltage(-12000); delay(100); claw.move_voltage(12000);
+    liftControl(-700, 1000);
+    
+    
+    // --------- score 1 ---------
+
+    // chassis.moveToPoint(-23.5, -47, 9999); chassis.waitUntilDone(); goalReset(-23.5, -47); // move to goal
+    chassis.tank(32, 32, true); delay(700); // alternate move to goal
+
+    liftControl(-82, 400); claw.move_voltage(-12000); delay(800); liftControl(-700, 1000); // score
+    
+
+    chassis.moveToPoint(-41, -56, 1000, {.forwards = false}); chassis.waitUntilDone(); // go back
+    // chassis.moveToPoint(-45, -60, 700, {.forwards = false, .maxSpeed = 63}); // alternate go back
+
+    // --------- score 2 ---------
+
+    liftSetTarget(0);
+
+    claw.move_voltage(12000); chassis.turnToPoint(-48, -46, 700); chassis.moveToPoint(-48, -46, 700, {.maxSpeed = 78}); // intake second stack
+
+    chassis.waitUntilDone(); liftControl(-1000, 1000); claw.move(0); // lift up
+    
+    chassis.moveToPoint(-23.5, -47, 1500); chassis.waitUntilDone(); goalReset(-23.5, -47); // move to goal
+
+    liftControl(0, 1000); delay(200); claw.move_voltage(-12000); delay(700); // lift down and let go
+
+    // --------- toggle ---------
+
+    chassis.moveToPoint(0, -37, 1000, {.forwards = false}); // go back
+
+    chassis.waitUntilDone(); rsalute.set_value(true); claw.move_voltage(0); liftControl(0, 700); // lift down, claw stop, salute up
+
+    chassis.turnToPoint(0, -64, 700); chassis.moveToPoint(0, -64, 1500); // ram into toggle
+
+    chassis.waitUntilDone(); rsalute.set_value(false); chassis.moveToPoint(0, -42, 1000, {.forwards = false}); // toggle
+
+}
+
 void autonomous() {
 chassis.setPose(-69.42, -0, 0);
 chassis.tank(32, 32, true);
