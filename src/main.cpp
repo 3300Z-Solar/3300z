@@ -141,62 +141,17 @@ void goalReset(double goalx, double goaly) {
     chassis.setPose(x, y, chassis.getPose().theta);
 }
 void autonomous() {
-chassis.setPose(0, 0, 0);
-claw.move_voltage(12000);
-delay(90);
-chassis.moveToPoint(0, 1, 500);
-claw.brake();
-chassis.waitUntilDone();
-btoggle.move_voltage(-12000);
-delay(500);
-btoggle.brake();
-claw.move_voltage(12000);
-liftSetTarget(-630);
-chassis.moveToPoint(15.5, 10.3, 900, {.maxSpeed = 127});
+chassis.setPose(-69.42, -0, 0);
+chassis.tank(32, 32, true);
+goalReset(-69.42, -0);
+chassis.moveToPoint(-47.09, -23.79, 5000);
+chassis.moveToPoint(-47.94, -6.8, 5000);
+chassis.moveToPoint(-23.79, -23.3, 5000);
+chassis.moveToPoint(-47.21, -24.15, 5000);
+chassis.moveToPoint(-28.4, -28.04, 5000);
+chassis.moveToPoint(-47.21, -46.85, 5000);
+chassis.moveToPoint(-47.09, -23.91, 5000);
 
-chassis.waitUntilDone();
-liftSetTarget(400);
-delay(400);
-claw.move_voltage(-12000);
-delay(500);
-claw.brake();
-
-chassis.moveToPoint(-2, 12, 500, {.forwards=false});
-chassis.waitUntilDone();
-chassis.turnToHeading(52, 500);
-chassis.moveToPoint(18.2, 24.2, 1000, {.maxSpeed = 127});
-claw.move_voltage(-12000);
-delay(550);
-claw.brake();
-delay(50);
-claw.move_voltage(12000);
-delay(650);
-liftSetTarget(-850);
-chassis.turnToHeading(170, 800);
-chassis.moveToPoint(24.2, 11.4, 700, {.maxSpeed = 120});
-chassis.waitUntilDone();
-claw.move_voltage(12000);
-liftSetTarget(-125);
-delay(200);
-claw.move_voltage(-12000);
-delay(500);
-claw.brake();
-chassis.moveToPoint(29, 22, 1000, {.forwards = false,.maxSpeed = 127});
-chassis.turnToHeading(135, 800);
-liftSetTarget(0);
-chassis.moveToPoint(39, 10, 700, {.maxSpeed = 120});
-chassis.waitUntilDone();
-claw.move_voltage(12000);
-delay(650);
-claw.brake();
-liftSetTarget(-1250);
-chassis.turnToHeading(270, 800);
-chassis.moveToPoint(26.9, 3.6, 700, {.maxSpeed = 120});
-chassis.waitUntilDone();
-claw.move_voltage(12000);
-liftSetTarget(-125);
-delay(200);
-claw.move_voltage(-2000);
 }
 
 void opcontrol() {
