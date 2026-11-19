@@ -266,6 +266,7 @@ void richard_auto() {
     liftSetTarget(6500);
     chassis.moveToPoint(-60, -19, 1200);
     chassis.waitUntilDone();
+    chassis.tank(32, 32, false);
     goalReset(-47, -23.5);
     liftSetTarget(7700);
     delay(400);
@@ -287,7 +288,7 @@ void richard_auto() {
     delay(350);
 
     // move to goal and score pin 2
-    liftSetTarget(6000);
+    liftSetTarget(5500);
     chassis.moveToPoint(-47, -23.5, 1200, {.maxSpeed = 127});
     chassis.waitUntilDone();
     goalReset(-47, -23.5);
@@ -337,6 +338,7 @@ void skills() {
     liftSetTarget(6500);
     chassis.moveToPoint(-60, -19, 1200);
     chassis.waitUntilDone();
+    chassis.tank(32, 32, false);
     goalReset(-47, -23.5);
     liftSetTarget(7700);
     delay(400);
@@ -358,7 +360,7 @@ void skills() {
     delay(350);
 
     // move to goal and score pin 2
-    liftSetTarget(6000);
+    liftSetTarget(5500);
     chassis.moveToPoint(-47, -23.5, 1200, {.maxSpeed = 127});
     chassis.waitUntilDone();
     goalReset(-47, -23.5);
@@ -387,7 +389,7 @@ void skills() {
     chassis.turnToPoint(-47, -23.5, 700);
     chassis.moveToPoint(-47, -23.5, 1000);
     chassis.waitUntilDone();
-    chassis.tank(32, 32, true);
+    // chassis.tank(32, 32, true);
     liftSetTarget(8200);
     delay(200);
     goalReset(-47, -23.5);
@@ -395,10 +397,21 @@ void skills() {
 
     // move to matchloader
 
-    chassis.moveToPoint(-47, -55, 1000, {.forwards = false});
-    chassis.turnToPoint(-61.5, -58.8, 1000);
-    chassis.moveToPoint(-61.5, -58.8, 1000);
-
+    chassis.moveToPoint(-47, -59, 1000, {.forwards = false});
+    chassis.turnToPoint(-68.5, -59, 1000);
+    chassis.moveToPoint(-68.5, -59, 1000);
+    claw.move_voltage(12000);
+    chassis.moveToPoint(-47, -59, 1000, {.forwards = false});
+    liftSetTarget(3000);
+    delay(200);
+    chassis.turnToPoint(-47, -23.5, 700);
+    chassis.moveToPoint(-47, -23.5, 1000);
+    chassis.waitUntilDone();
+    // chassis.tank(32, 32, true);
+    liftSetTarget(7000);
+    delay(200);
+    goalReset(-47, -23.5);
+    claw.move_voltage(-12000);
 
 
 
