@@ -399,7 +399,7 @@ void skills() {
 
     chassis.moveToPoint(-47, -59, 1000, {.forwards = false});
     chassis.turnToPoint(-68.5, -59, 1000);
-    chassis.moveToPoint(-68.5, -59, 1000);
+    chassis.moveToPoint(-63, -59, 1000);
     claw.move_voltage(12000);
     chassis.moveToPoint(-47, -59, 1000, {.forwards = false});
     liftSetTarget(3000);
