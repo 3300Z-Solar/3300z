@@ -7,6 +7,7 @@
 
 
 inline pros::MotorGroup liftMotors({9, -1}, pros::MotorGearset::green); // lift motor group - ports 4, 2 (reversed)
+inline pros::Rotation liftEnc(5);
 
 // lift preset positions in motor encoder degrees
 // flip SHOW_LIFT_POS_DEBUG to true in main.cpp to re-measure these
@@ -15,9 +16,9 @@ inline int liftStates[6] = {0, -200, 160, 143, 125, 206};
 // [1] = slightly above ground, after picking up an object
 
 // lemlib PID driving the lift - output is millivolts, clamped to +/-12000
-inline lemlib::PID liftPid(15, // kP
+inline lemlib::PID liftPid(4, // kP
                            0, // kI
-                           100, // kD
+                           32, // kD
                            0, // integral anti windup range (deg)
                            false); // reset integral when sign of error flips
 
@@ -37,6 +38,11 @@ inline double liftGetPosition() {
     return sum / positions.size();
 }
 
+inline double liftEncGetPosition() {
+    return liftEnc.get_position();
+}
+
+
 // point the lift at a target and let the PID task drive there (returns immediately)
 inline void liftSetTarget(double target) {
     liftTarget = target;
@@ -52,7 +58,7 @@ inline void liftManual() {
 
 // true once the PID is on and the lift is within tolerance of its target
 inline bool liftAtTarget() {
-    return liftHolding && std::fabs(liftGetPosition() - liftTarget) <= LIFT_TOLERANCE;
+    return liftHolding && std::fabs(liftEncGetPosition() - liftTarget) <= LIFT_TOLERANCE;
 }
 
 // drive to target and block until it settles (or timeout), then keep holding - used by autonomous
@@ -72,7 +78,7 @@ inline void liftTaskFn() {
     liftMotors.move(0);
     while (true) {
         if (liftHolding) {
-            double error = liftTarget - liftGetPosition();
+            double error = liftTarget - liftEncGetPosition();
             double output = liftPid.update(error);
             if (std::fabs(error) > LIFT_TOLERANCE && std::fabs(output) < LIFT_MIN_OUTPUT) {
                 output = std::copysign(LIFT_MIN_OUTPUT, error);
