@@ -118,17 +118,17 @@ void initialize() {
     pros::Task liftTask{liftTaskFn}; // lemlib PID loop for the lift
     // liftControl(liftStates[0]);
 
-    // pros::Task loggingTask([&]() {
-    //     while (true) {
-    //         lemlib::Pose pose = chassis.getPose();
-    //         pros::lcd::print(0, "X: %.2f", pose.x);         // x
-    //         pros::lcd::print(1, "Y: %.2f", pose.y);         // y
-    //         pros::lcd::print(2, "Theta: %.2f", pose.theta); // heading
-    //         printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
-    //                pose.x, pose.y, pose.theta, pros::millis());
-    //         delay(50);
-    //     }
-    // });
+    pros::Task loggingTask([&]() {
+        while (true) {
+            lemlib::Pose pose = chassis.getPose();
+            pros::lcd::print(0, "X: %.2f", pose.x);         // x
+            pros::lcd::print(1, "Y: %.2f", pose.y);         // y
+            pros::lcd::print(2, "Theta: %.2f", pose.theta); // heading
+            printf("{\"pose\":{\"x\":%.2f,\"y\":%.2f,\"theta\":%.2f},\"t\":%u}\n",
+                   pose.x, pose.y, pose.theta, pros::millis());
+            delay(50);
+        }
+    });
 }
 
 void disabled() {}
@@ -398,17 +398,17 @@ void richard_auto() {
     delay(200);
     claw.move_voltage(-12000);
 }
-void skills() {
+void lethan_skills() {
 
     // flip toggle and release banding
     chassis.setPose(-67, 0, 90);
     claw.move_voltage(12000);
-    delay(70);
+    delay(90);
     claw.brake();
     btoggle.move_voltage(-12000);
     delay(400);
     btoggle.brake();
-    claw.move_voltage(12000);
+    // claw.move_voltage(12000);
 
     // move to goal and score pin 1
     liftSetTarget(6500);
@@ -423,7 +423,7 @@ void skills() {
     claw.brake();
 
     // back out of goal and grab 2
-    chassis.moveToPoint(-32, 4, 900, {.forwards = false});
+    chassis.moveToPoint(-39, 4, 1000, {.forwards = false});
     chassis.waitUntilDone();
     chassis.turnToPoint(-24.5, -22, 700);
     chassis.moveToPoint(-24.5, -22, 1500, {.maxSpeed = 90});
@@ -460,7 +460,7 @@ void skills() {
     
 
     // move to goal and score pin 3
-    liftSetTarget(4000);
+    liftSetTarget(4300);
     delay(200);
     chassis.turnToPoint(-47, -23.5, 700);
     chassis.moveToPoint(-47, -23.5, 1000);
@@ -473,28 +473,53 @@ void skills() {
 
     // move to matchloader
 
-    chassis.moveToPoint(-47, -59, 1000, {.forwards = false});
-    chassis.turnToPoint(-68.5, -59, 1000);
-    chassis.moveToPoint(-68.5, -59, 1000);
+    chassis.moveToPoint(-47, -59, 2000, {.forwards = false, .maxSpeed = 127});
+    // liftSetTarget(8200);
+    chassis.turnToPoint(-68.5, -58, 1000);
+    chassis.moveToPoint(-57, -57, 1000);
     claw.move_voltage(12000);
-    chassis.moveToPoint(-47, -59, 1000, {.forwards = false});
-    liftSetTarget(3000);
-    delay(200);
-    chassis.turnToPoint(-47, -23.5, 700);
-    chassis.moveToPoint(-47, -23.5, 1000);
+
+    // score matchloader
+    chassis.moveToPoint(-42, -59, 1200, {.forwards = false, .maxSpeed = 70});
+    liftSetTarget(2600);
+    chassis.turnToPoint(-42, -23.5, 1100);
+    chassis.moveToPoint(-42, -23.5, 1000, {.maxSpeed = 70});
     chassis.waitUntilDone();
-    // chassis.tank(32, 32, true);
-    liftSetTarget(7000);
+    chassis.tank(32, 32, true);
+    delay(800);
+    liftSetTarget(8200);
     delay(200);
     goalReset(-47, -23.5);
     claw.move_voltage(-12000);
 
+    // move to matchloader
 
+    chassis.moveToPoint(-47, -59, 2000, {.forwards = false, .maxSpeed = 127});
+    // liftSetTarget(8200);
+    chassis.turnToPoint(-68.5, -58, 1000);
+    chassis.moveToPoint(-59.5, -57, 1000);
+    claw.move_voltage(12000);
 
+    // score matchloader
+    chassis.moveToPoint(-42, -59, 1200, {.forwards = false, .maxSpeed = 90});
+    liftSetTarget(1600);
+    chassis.turnToPoint(-42, -23.5, 1100);
+    chassis.moveToPoint(-42, -23.5, 1000, {.maxSpeed = 70});
+    chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    delay(800);
+    liftSetTarget(3000);
+    delay(200);
+    goalReset(-47, -23.5);
+    claw.move_voltage(-12000);
+    delay(400);
+
+    chassis.moveToPoint(-47.5, -40, 2000, {.forwards = false, .maxSpeed = 127});
+    chassis.moveToPoint(-16, 0, 2000);
 }
 
 void autonomous() {
-    josh2();
+    lethan_skills();
 }
 
 void opcontrol() {
