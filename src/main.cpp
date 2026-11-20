@@ -63,9 +63,9 @@ lemlib::ControllerSettings linearController(8,
                                             0, 
                                             58,
                                             3, 
-                                            0.001, 
+                                            0.5, 
                                             100, 
-                                            0.001, 
+                                            0.5, 
                                             500, 
                                             0 
 );
@@ -75,9 +75,9 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
                                              0, // integral gain (kI)
                                              13.875, // derivative gain (kD)
                                              3, // anti windup
-                                             0.001, // small error range, in degrees
+                                             0.5, // small error range, in degrees
                                              100, // small error range timeout, in milliseconds
-                                             0.001, // large error range, in degrees
+                                             0.5, // large error range, in degrees
                                              500, // large error range timeout, in milliseconds
                                              0 // maximum acceleration (slew)
 );
@@ -250,6 +250,82 @@ void josh_far() {
 
 }
 
+void josh2() {
+
+    chassis.setPose(-34, -60, 41);
+    // claw.move_voltage(12000); delay(100); claw.move_voltage(-12000); delay(100); claw.move_voltage(12000);
+    liftSetTarget(6000);
+    
+    
+    // --------- score 1 ---------
+
+    // chassis.moveToPoint(-23.5, -47, 9999); chassis.waitUntilDone(); goalReset(-23.5, -47); // move to goal
+    chassis.tank(32, 32, true); delay(700); // alternate move to goal
+
+    liftControl(8000, 500); claw.move_voltage(-12000); liftControl(6000, 1000); // score
+    
+    chassis.swingToPoint(20, -74.41, DriveSide::LEFT, 1000, {.direction = AngularDirection::CW_CLOCKWISE});
+    chassis.waitUntilDone(); liftControl(7400, 1000); claw.move_voltage(12000);
+    chassis.moveToPoint(-10, -74.41, 1000, {.maxSpeed = 32});
+    chassis.swingToHeading(180, lemlib::DriveSide::RIGHT, 1000);
+    chassis.moveToPoint(-23.5, -47, 200);
+    chassis.turnToPoint(23.52, -46.94, 600);
+    liftSetTarget(4000);
+    chassis.moveToPoint(16, -50, 1500);
+    chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    liftControl(6000, 500); claw.move_voltage(-12000);
+    chassis.moveToPoint(0, -47, 500, {.forwards = false});
+    chassis.waitUntilDone(); claw.brake(); liftControl(7400, 1000);
+    // rsalute.extend();
+    chassis.turnToPoint(0, -64, 500); chassis.moveToPoint(0, -64, 500);
+    chassis.waitUntilDone();
+    // rsalute.retract();
+    delay(500);
+    chassis.moveToPoint(0, -47, 500, {.forwards = false, .maxSpeed = 64});
+    
+
+
+}
+
+void josh2close() {
+
+    chassis.setPose(-60, -34, 41);
+    // claw.move_voltage(12000); delay(100); claw.move_voltage(-12000); delay(100); claw.move_voltage(12000);
+    liftSetTarget(6000);
+    
+    
+    // --------- score 1 ---------
+
+    // chassis.moveToPoint(-23.5, -47, 9999); chassis.waitUntilDone(); goalReset(-23.5, -47); // move to goal
+    chassis.tank(32, 32, true); delay(700); // alternate move to goal
+
+    liftControl(8000, 500); claw.move_voltage(-12000); liftControl(6000, 1000); // score
+    
+    chassis.swingToPoint(-74.41, -2.5, DriveSide::RIGHT, 1000, {.direction = AngularDirection::CCW_COUNTERCLOCKWISE});
+    chassis.waitUntilDone(); liftControl(7400, 1000); claw.move_voltage(12000);
+    chassis.moveToPoint(-74.41, -15, 1500, {.maxSpeed = 32});
+    chassis.swingToHeading(180, lemlib::DriveSide::LEFT, 1000);
+    chassis.moveToPoint(-47, -23.5, 200);
+    chassis.turnToPoint(-46.94, 23.52, 600);
+    liftSetTarget(4000);
+    chassis.moveToPoint(-50, 16, 1500);
+    chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    liftControl(6000, 500); claw.move_voltage(-12000);
+    chassis.moveToPoint(-47, 0, 500, {.forwards = false});
+    chassis.waitUntilDone(); claw.brake(); liftControl(7400, 1000);
+    rsalute.extend();
+    chassis.turnToPoint(-64, 0, 500); chassis.moveToPoint(-64, 0, 500);
+    chassis.waitUntilDone();
+    rsalute.retract();
+    delay(500);
+    chassis.moveToPoint(-47, 0, 500, {.forwards = false, .maxSpeed = 64});
+    
+
+
+}
+
 void richard_auto() {
 
     // flip toggle and release banding
@@ -418,7 +494,7 @@ void skills() {
 }
 
 void autonomous() {
-    skills();
+    josh2();
 }
 
 void opcontrol() {
