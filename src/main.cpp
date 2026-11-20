@@ -277,10 +277,10 @@ void josh2() {
     liftControl(6000, 500); claw.move_voltage(-12000);
     chassis.moveToPoint(0, -47, 500, {.forwards = false});
     chassis.waitUntilDone(); claw.brake(); liftControl(7400, 1000);
-    // rsalute.extend();
+    rsalute.extend();
     chassis.turnToPoint(0, -64, 500); chassis.moveToPoint(0, -64, 500);
     chassis.waitUntilDone();
-    // rsalute.retract();
+    rsalute.retract();
     delay(500);
     chassis.moveToPoint(0, -47, 500, {.forwards = false, .maxSpeed = 64});
     
@@ -403,7 +403,7 @@ void lethan_skills() {
     // flip toggle and release banding
     chassis.setPose(-67, 0, 90);
     claw.move_voltage(12000);
-    delay(90);
+    delay(100);
     claw.brake();
     btoggle.move_voltage(-12000);
     delay(400);
@@ -479,8 +479,8 @@ void lethan_skills() {
     chassis.moveToPoint(-57, -57, 1000);
     claw.move_voltage(12000);
 
-    // score matchloader
-    chassis.moveToPoint(-42, -59, 1200, {.forwards = false, .maxSpeed = 70});
+    // score matchloader 1
+    chassis.moveToPoint(-41.5, -59, 1200, {.forwards = false, .maxSpeed = 70});
     liftSetTarget(2600);
     chassis.turnToPoint(-42, -23.5, 1100);
     chassis.moveToPoint(-42, -23.5, 1000, {.maxSpeed = 70});
@@ -494,17 +494,17 @@ void lethan_skills() {
 
     // move to matchloader
 
-    chassis.moveToPoint(-47, -59, 2000, {.forwards = false, .maxSpeed = 127});
+    chassis.moveToPoint(-46.9, -59, 2000, {.forwards = false, .maxSpeed = 127});
     // liftSetTarget(8200);
-    chassis.turnToPoint(-68.5, -58, 1000);
+    chassis.turnToPoint(-68.5, -57, 1000);
     chassis.moveToPoint(-59.5, -57, 1000);
     claw.move_voltage(12000);
 
-    // score matchloader
-    chassis.moveToPoint(-42, -59, 1200, {.forwards = false, .maxSpeed = 90});
+    // score matchloader 2
+    chassis.moveToPoint(-45.5, -59, 1200, {.forwards = false, .maxSpeed = 90});
     liftSetTarget(1600);
-    chassis.turnToPoint(-42, -23.5, 1100);
-    chassis.moveToPoint(-42, -23.5, 1000, {.maxSpeed = 70});
+    chassis.turnToPoint(-43, -23.5, 1100);
+    chassis.moveToPoint(-43, -23.5, 1000, {.maxSpeed = 70});
     chassis.waitUntilDone();
     chassis.tank(32, 32, true);
     delay(800);
@@ -514,8 +514,50 @@ void lethan_skills() {
     claw.move_voltage(-12000);
     delay(400);
 
-    chassis.moveToPoint(-47.5, -40, 2000, {.forwards = false, .maxSpeed = 127});
-    chassis.moveToPoint(-16, 0, 2000);
+    // move to matchloader
+
+    chassis.moveToPoint(-41.5, -59, 2000, {.forwards = false, .maxSpeed = 127});
+    liftSetTarget(8200);
+    chassis.turnToPoint(-68.5, -58, 1000);
+    chassis.moveToPoint(-59.5, -57, 1000);
+    claw.move_voltage(12000);
+
+    // score matchloader 3
+    chassis.moveToPoint(-44.5, -53, 1200, {.forwards = false, .maxSpeed = 90});
+    liftSetTarget(20);
+    chassis.turnToPoint(-43, -27, 1100);
+    chassis.moveToPoint(-43, -27, 1000, {.maxSpeed = 70});
+    chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    delay(1200);
+    liftSetTarget(1500);
+    delay(200);
+    goalReset(-47, -23.5);
+    claw.move_voltage(-12000);
+    delay(400);
+
+    // move to matchloader
+
+    chassis.moveToPoint(-47, -59, 2000, {.forwards = false, .maxSpeed = 127});
+    liftSetTarget(8300);
+    chassis.turnToPoint(-68.5, -58, 1000);
+    chassis.moveToPoint(-60.3, -57, 1000);
+    claw.move_voltage(12000);
+    delay(200);
+
+    // score mid pin
+    chassis.moveToPoint(-47.5, -45, 2000, {.forwards = false, .maxSpeed = 127});
+    claw.brake();
+    liftSetTarget(5200);
+    chassis.turnToPoint(0, 0, 1100);
+    chassis.moveToPoint(0, 0, 2000, {.maxSpeed = 70});
+    chassis.waitUntilDone();
+    chassis.tank(32, 32, true);
+    delay(200);
+    liftSetTarget(7800);
+    claw.move_voltage(-12000);
+    delay(400);
+    claw.brake();
 }
 
 void autonomous() {
